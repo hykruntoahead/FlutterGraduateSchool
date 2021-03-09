@@ -298,3 +298,421 @@ pubspec.yaml 包含应用程序和依赖的软件包，规定Dart和Flutter SDK�
 
 如需了解更详细请查阅:
 [pubspec file 官方文档](https://dart.dev/tools/pub/pubspec)
+
+## 2.文本组件
+
+### 2.1 文本组件-Text
+Text是显示文本的组件，最常用的组件之一。基本用法如下：
+``` 
+Text('ykhe')
+```
+文本的样式在style中设置，类型为TextStyle，TextStyle中包含很多文本样式属性.
+
+设置文本大小和颜色：
+``` 
+Text('ykhe',style: TextStyle(color: Colors.blue,fontSize: 20),)
+```
+设置字体粗细:
+``` 
+Text('ykhe',style: TextStyle(fontWeight: FontWeight.bold))
+```
+字体粗细共有9个级别，为w100至w900，FontWeight.bold是w700.
+
+设置斜体:
+``` 
+Text('ykhe',style: TextStyle(fontStyle: FontStyle.italic,))
+```
+
+##### 设置自定义的字体：
+- 首先下载字体库（比如中华字体库）
+- 将字体文件拷贝的项目中，一般目录是：assets/fonts/，assets和fonts都需要手动创建，此目录不是必须的，而是约定俗成，资源一般都放在assets目录下。
+- 配置pubspec.yaml：
+``` 
+fonts:
+  - family: maobi 
+    fonts:
+      - asset: assets/fonts/maobi.ttf
+```
+> maobi：是自己对当前字体的命名，有意义即可。
+> asset：字体文件的目录。
+
+使用:
+```
+ Text('ykhe', style: TextStyle(fontFamily: 'maobi',))
+```
+
+设置对齐方式:
+```
+ Container(
+   height: 100,
+   width: 200,
+   color: Colors.blue.withOpacity(.4),
+   child: Text('ykhe', textAlign: TextAlign.center),
+ )
+```
+
+textAlign只是控制水平方向的对齐方式，值说明如下:
+ - left：左对齐
+ - right：右对齐
+ - center：居中
+ - justify：两端对齐
+ - start：前端对齐，和TextDirection属性有关，如果设置TextDirection.ltr，则左对齐，设置TextDirection.rtl则右对齐
+ - end：末端对齐，和TextDirection属性有关，如果设置TextDirection.ltr，则右对齐，设置TextDirection.rtl则左对齐
+ 
+设置文本自动换行：
+``` 
+Container(
+  height: 100,
+  width: 200,
+  color: Colors.blue.withOpacity(.4),
+  child: Text('专注分享Flutter技术和应用实战',softWrap: true,),
+)
+```
+
+文本超出范围时的处理：
+```
+ Container(
+   height: 100,
+   width: 200,
+   color: Colors.blue.withOpacity(.4),
+   child: Text('ykhe，专注分享Flutter技术和应用实战',overflow: TextOverflow.ellipsis,),
+ )
+```
+溢出的处理方式：
+ - clip：直接裁剪
+ - fade：越来越透明
+ - ellipsis：省略号结尾
+ - visible：依然显示，此时将会溢出父组件
+ 
+##### 设置全局字体样式：
+在MaterialApp的theme中设置如下:
+```
+ MaterialApp(
+   title: 'Flutter Demo',
+   theme: ThemeData(
+    ...
+     textTheme: TextTheme(
+         bodyText2: TextStyle(color: Colors.red,fontSize: 24),
+     )
+   ),
+   home: Scaffold(
+     ...
+   ),
+ ) 
+```
+使用Text组件时,会发现默认就为红色了.
+
+ ### 2.2文本组件-RichText
+ 
+ 如果想在一句话或者一段文字里面显示不同样式的文字，Text组件无法满足我们的需求，这个时候需要使用RichText.
+ ``` 
+ RichText(
+      text: TextSpan(
+          style: DefaultTextStyle.of(context).style,
+          children: <InlineSpan>[
+            TextSpan(text: 'ykhe',style: TextStyle(color: Colors.red)),
+            TextSpan(text: '，'),
+            TextSpan(text: '做一个有梦想的合格程序员'),
+          ]),
+    )
+ ```
+
+当文字有较多行时，可以设置其对齐方式：
+``` 
+RichText(
+	textAlign: TextAlign.end,
+	...
+)
+```
+
+#####  手势交互
+以设置其他样式，比如大小、斜体等，甚至我们还可以添加点击效果:
+```
+ RichText(
+       text: TextSpan(
+           style: DefaultTextStyle.of(context).style,
+           children: <InlineSpan>[
+             TextSpan(text: '登陆即视为同意'),
+             TextSpan(
+               text: '《做个沙叼的服务协议》',
+               style: TextStyle(color: Colors.red),
+               recognizer: TapGestureRecognizer()..onTap = () {
+                 
+               },
+             ),
+           ]),
+     )
+```
+
+
+### 1.3 文本输入组件-TextField
+TextField 是文本输入组件，即输入框，常用组件之一。基本用法：
+``` 
+TextField()
+```
+
+decoration是TextField组件的装饰（外观）参数，类型是InputDecoration  
+ icon显示在输入框的前面，用法如下:
+```
+ TextField(
+   decoration: InputDecoration(
+     icon: Icon(Icons.person),
+   )
+ )
+```
+
+当输入框是空而且没有焦点时，labelText显示在输入框上边，当获取焦点或者不为空时labelText往上移动一点，labelStyle参数表示文本样式，具体参考TextStyle， 用法如下:
+
+``` 
+TextField(
+  decoration: InputDecoration(
+    labelText: '姓名：',
+    labelStyle: TextStyle(color:Colors.red)
+  ),
+)
+```
+![效果图示](https://img-blog.csdnimg.cn/20200306165321575.gif)
+
+hasFloatingPlaceholder参数控制当输入框获取焦点或者不为空时是否还显示labelText，默认为true，显示。
+
+helperText显示在输入框的左下部，用于提示用户，helperStyle参数表示文本样式.
+```
+ TextField(
+   decoration: InputDecoration(
+     helperText: '用户名长度为6-10个字母',
+     helperStyle: TextStyle(color: Colors.blue),
+     helperMaxLines: 1
+   ),
+ )
+```
+hintText是当输入框为空时的提示，不为空时不在显示:
+```
+ TextField(
+   decoration: InputDecoration(
+     hintText: '请输入用户名',
+     hintStyle: TextStyle(color: Colors.grey),
+     hintMaxLines: 1
+   ),
+ )
+```
+errorText显示在输入框的左下部，默认字体为红色，用法如下：
+``` 
+TextField(
+  decoration: InputDecoration(
+    errorText: '用户名输入错误',
+    errorStyle: TextStyle(fontSize: 12),
+    errorMaxLines: 1,
+    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+  ),
+)
+```
+
+prefix系列的组件是输入框前面的部分:
+```
+ TextField(
+   decoration: InputDecoration(
+     prefixIcon: Icon(Icons.person)
+   ),
+ )
+```
+注意prefix和icon的区别，icon是在输入框边框的外部，而prefix在里面。
+
+suffix和prefix相反，suffix在输入框的尾部:
+```
+TextField(
+  decoration: InputDecoration(
+      suffixIcon: Icon(Icons.person)
+  ),
+)
+```
+counter组件统计输入框文字的个数，counter仅仅是展示效果，不具备自动统计字数的功能:
+```
+var _textFieldValue = '';
+TextField(
+  onChanged: (value){
+    setState(() {
+      _textFieldValue = value;
+    });
+  },
+  decoration: InputDecoration(
+    counterText: '${_textFieldValue.length}/32'
+  ),
+)
+```
+
+filled为true时，输入框将会被fillColor填充，仿QQ登录输入框代码如下：
+```
+ Container(
+   height: 60,
+   width: 250,
+   child: TextField(
+     decoration: InputDecoration(
+       fillColor: Color(0x30cccccc),
+       filled: true,
+       enabledBorder: OutlineInputBorder(
+           borderSide: BorderSide(color: Color(0x00FF0000)),
+           borderRadius: BorderRadius.all(Radius.circular(100))),
+       hintText: 'QQ号/手机号/邮箱',
+       focusedBorder: OutlineInputBorder(
+           borderSide: BorderSide(color: Color(0x00000000)),
+           borderRadius: BorderRadius.all(Radius.circular(100))),
+     ),
+   ),
+ )
+```
+controller是输入框文本编辑的控制器，可以获取TextField的内容、设置TextField的内容，下面将输入的英文变为大写：
+```
+ TextEditingController _controller;
+ 
+ @override
+ void initState() {
+   super.initState();
+   _controller = TextEditingController()
+     ..addListener(() {
+       //获取输入框的内容，变为大写
+       _controller.text = _controller.text.toUpperCase();
+ 
+     });
+ }
+ 
+ @override
+ Widget build(BuildContext context) {
+   return TextField(
+     controller: _controller,
+   );
+ }
+ 
+ @override
+ dispose() {
+   super.dispose();
+   _controller.dispose();
+ }
+```
+有时输入框后面带有“清除”功能，需要controller来实现。
+
+##### keyboardType参数控制软键盘的类型:
+    - text：通用键盘。
+    - multiline：当TextField为多行时（maxLines设置大于1），右下角的为“换行” 按键。
+    - number：数字键盘。
+    - phone：手机键盘，比数字键盘多"*"和 "#"。
+    - datetime：在ios上和text一样，在android上出现数字键盘、":"和 "-"。
+    - emailAddress：邮箱键盘，有"@" 和 "."按键。
+    - url：url键盘，有"/" 和 "."按键。
+    - visiblePassword：既有字母又有数字的键盘。
+
+##### textInputAction参数控制软键盘右下角的按键:
+      -  none：android上显示返回键，ios不支持。
+      -  unspecified：让操作系统自己决定哪个合适，一般情况下，android显示“完成”或者“返回”。
+      -  done：android显示代表“完成”的按钮，ios显示“Done”（中文：完成）。
+      -  go：android显示表达用户去向目的地的图标，比如向右的箭头，ios显示“Go”（中文：前往）。
+      -  search：android显示表达搜索的按钮，ios显示"Search"（中文：搜索）。
+      -  send：android显示表达发送意思的按钮，比如“纸飞机”按钮，ios显示"Send"（中文：发送）。
+      -  next：android显示表达“前进”的按钮，比如“向右的箭头”,ios显示"Next"（中文：下一项）。
+      -  previous：android显示表达“后退”的按钮，比如“向左的箭头”,ios不支持。
+      -  continueAction：android 不支持，ios仅在ios9.0+显示"Continue"（中文：继续）。
+      -  join：Android和ios显示"Join"（中文：加入）。
+      -  route：android 不支持，ios显示"Route"（中文：路线）。
+      -  emergencyCall：android 不支持，ios显示"Emergency Call"（中文：紧急电话）。
+      -  newline：android显示表达“换行”的按钮，ios显示”换行“。
+ 
+##### textCapitalization参数是配置键盘是大写还是小写，仅支持键盘模式为text，其他模式下忽略此配置
+       -   words：每一个单词的首字母大写。
+       -   sentences：每一句话的首字母大写。
+       -   characters：每个字母都大写
+       -   none：都小写
+
+这里仅仅控制软键盘是大写模式还是小写模式，你也可以切换大小写，系统并不会改变输入框内的内容。
+
+textAlignVertical表示垂直方向的对齐方式，textDirection表示文本方向:
+```
+TextField(
+  textAlignVertical: TextAlignVertical.center,
+  textDirection: TextDirection.rtl,
+) 
+```
+toolbarOptions表示长按时弹出的菜单，有copy、cut、paste、selectAll，用法如下：
+```
+ TextField(
+   toolbarOptions: ToolbarOptions(
+     copy: true,
+     cut: true,
+     paste: true,
+     selectAll: true
+   ),
+ )
+```
+cursor表示光标，用法如下：
+```
+ TextField(
+   showCursor: true,
+   cursorWidth: 3,
+   cursorRadius: Radius.circular(10),
+   cursorColor: Colors.red,
+ )
+```
+将输入框设置为密码框，只需obscureText属性设置true即可:
+```
+ TextField(
+   obscureText: true,
+ )
+
+```
+通过inputFormatters可以限制用户输入的内容，比如只想让用户输入字符，设置如下
+```
+ TextField(
+   inputFormatters: [
+     WhitelistingTextInputFormatter(RegExp("[a-zA-Z]")),
+   ],
+ )
+
+```
+
+onChanged是当内容发生变化时回调，onSubmitted是点击回车或者点击软键盘上的完成回调，onTap点击输入框时回调:
+```
+ TextField(
+   onChanged: (value){
+     print('onChanged:$value');
+   },
+   onEditingComplete: (){
+     print('onEditingComplete');
+   },
+   
+   onTap: (){
+     print('onTap');
+   },
+ )
+```
+输入框右下角经常需要**字数统计**，除了使用上面介绍的方法外，还可以**使用buildCounter，建议使用此方法**:
+```
+ TextField(
+   maxLength: 100,
+   buildCounter: (
+     BuildContext context, {
+     int currentLength,
+     int maxLength,
+     bool isFocused,
+   }) {
+     return Text(
+       '$currentLength/$maxLength',
+     );
+   },
+ )
+```
+
+动态获取焦点:
+```
+ FocusScope.of(context).requestFocus(_focusNode);
+```
+_focusNode为TextField的focusNode：
+```
+ _focusNode = FocusNode();
+ 
+ TextField(
+ 	focusNode: _focusNode,
+ 	...
+ )
+```
+动态失去焦点:
+```
+ _focusNode.unfocus();
+```
