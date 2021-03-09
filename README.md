@@ -719,4 +719,4 @@ _focusNode为TextField的focusNode：
 ```
 ### 2.4文本组件案例
 参见:  
-[text_wdget_instances.dart](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/text_wdget_instances.dart)
+[text_widget_instances.dart](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/text_wdget_instances.dart)
