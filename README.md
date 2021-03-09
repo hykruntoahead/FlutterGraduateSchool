@@ -43,7 +43,7 @@ File->New->New Flutter Project.
 - pubspec.yaml：这个是Flutter项目的依赖配置文件，类似于Android build.gradle文件，这里面包含了Flutter SDK 版本、依赖等
 
 ##### 运行工程代码分析
-![运行图示] (https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/flutter_demo_home_page.png)
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/flutter_demo_home_page.png)
 代码实现在:lib/main.dart
 ```
 void main() {
@@ -719,4 +719,4 @@ _focusNode为TextField的focusNode：
 ```
 ### 2.4文本组件案例
 参见:  
-[text_wdget_instances.dart] (https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/text_wdget_instances.dart)
+[text_wdget_instances.dart](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/text_wdget_instances.dart)
