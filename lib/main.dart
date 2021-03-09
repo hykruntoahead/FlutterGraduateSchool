@@ -1,6 +1,5 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_demo/text_wdget_instances.dart';
+import 'package:flutter_app_demo/text_widget_instances.dart';
 
 void main() {
   runApp(MyApp());
