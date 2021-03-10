@@ -1000,3 +1000,193 @@ CheckboxListTile(
 secondary一般放置一个图标，位于勾选框的另一边
 
 selected参数设置true，secondary、title和subtitle都会被渲染为activeColor的颜色.
+
+### 3.4 滑块组件
+
+##### Slide
+基础用法:
+```
+class SliderDemo extends StatefulWidget {
+  @override
+  _SliderDemoState createState() => _SliderDemoState();
+}
+
+class _SliderDemoState extends State<SliderDemo> {
+  double _sliderValue = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('值：$_sliderValue'),
+            Slider(
+              value: _sliderValue,
+              onChanged: (v){
+                setState(() {
+                  _sliderValue = v;
+                });
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+} 
+```
+- value：当前值。
+- onChanged：滑块值改变时回调。
+
+Slider 默认滑动范围是 0-1，修改为 1-100:
+```
+ Slider(
+   value: _sliderValue,
+   min: 1,
+   max: 100,
+   onChanged: (v){
+     setState(() {
+       _sliderValue = v;
+     });
+   },
+ )
+```
+
+设置滑块的滑动为 离散的，即滑动值为 0、25 、50、75 100：
+```
+ Slider(
+   value: _sliderValue,
+   min: 0,
+   max: 100,
+   divisions: 4,
+   onChanged: (v){
+     setState(() {
+       _sliderValue = v;
+     });
+   },
+ )
+
+```
+
+设置标签，滑动过程中在其上方显示：
+```
+ Slider(
+   value: _sliderValue,
+   label: '$_sliderValue',
+   min: 0,
+   max: 100,
+   divisions: 4,
+   onChanged: (v){
+     setState(() {
+       _sliderValue = v;
+     });
+   },
+ )
+```
+
+下面是官方给的 Slider 结构图：
+![Slider结构图](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/slider.png)
+
+   - **1 ：轨道（Track）**，1 和 4 是有区别的，1 指的是底部整个轨道，轨道显示了可供用户选择的范围。对于从左到右（LTR）的语言，最小值出现在轨道的最左端，而最大值出现在最右端。对于从右到左（RTL）的语言，此方向是相反的。
+   - **2：滑块（Thumb）**，位置指示器，可以沿着轨道移动，显示其位置的选定值。
+   - **3：标签（label）**，显示与滑块的位置相对应的特定数字值。
+   - **4：刻度指示器（Tick mark）**，表示用户可以将滑块移动到的预定值。
+   
+ 自定义滑块 **激活的颜色** 和 **未激活的颜色**：
+ ``` 
+Slider(
+  activeColor: Colors.red,
+  inactiveColor: Colors.blue,
+  value: _sliderValue,
+  label: '$_sliderValue',
+  min: 0,
+  max: 100,
+  divisions: 4,
+  onChanged: (v){
+    setState(() {
+      _sliderValue = v;
+    });
+  },
+)
+ ```
+##### 自定义样式
+
+更细致的自定义：
+```
+ SliderTheme(
+   data: SliderTheme.of(context).copyWith(
+       activeTrackColor: Color(0xff404080),
+       thumbColor: Colors.blue,
+       overlayColor: Colors.green,
+       valueIndicatorColor: Colors.purpleAccent),
+   child: Slider(
+     value: _sliderValue,
+     label: '$_sliderValue',
+     min: 0,
+     max: 100,
+     divisions: 4,
+     onChanged: (v) {
+       setState(() {
+         _sliderValue = v;
+       });
+     },
+   ),
+ )
+
+```
+
+#####  RangeSlider
+**RangeSlider** 和 **Slider** 几乎一样，RangeSlider 是范围滑块，想要选择一段值，可以使用 RangeSlider。
+```
+ RangeValues _rangeValues = RangeValues(0, 25);
+ 
+ RangeSlider(
+   values: _rangeValues,
+   labels: RangeLabels('${_rangeValues.start}','${_rangeValues.end}'),
+   min: 0,
+   max: 100,
+   divisions: 4,
+   onChanged: (v) {
+     setState(() {
+       _rangeValues = v;
+     });
+   },
+ ),
+
+```
+
+#####  滑块状态
+![滑块状态](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/slider.png)
+
+##### ios风格的 Slider
+ios风格的 Slider，使用 CupertinoSlider：
+``` 
+double _sliderValue = 0;
+CupertinoSlider(
+  value: _sliderValue,
+  onChanged: (v) {
+    setState(() {
+      _sliderValue = v;
+    });
+  },
+)
+
+```
+
+当然也可以根据平台显示不同风格的Slider，ios平台显示CupertinoSlider效果，其他平台显示Material风格，用法如下：
+```
+ Slider.adaptive(
+   value: _sliderValue,
+   onChanged: (v) {
+     setState(() {
+       _sliderValue = v;
+     });
+   },
+ )
+ 
+```
+
+[Slider实践代码](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/slider_demo.dart)
