@@ -1159,7 +1159,7 @@ Slider(
 ```
 
 #####  滑块状态
-![滑块状态](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/slider.png)
+![滑块状态](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/slider_state.png)
 
 ##### ios风格的 Slider
 ios风格的 Slider，使用 CupertinoSlider：
