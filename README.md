@@ -1215,6 +1215,7 @@ Switch为material风格的开关组件，基本用法如下:
        ...
      ）
 ```
+
 ![效果图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/switch_active.png)
 
 红色区域为thumb，蓝色区域为track。
