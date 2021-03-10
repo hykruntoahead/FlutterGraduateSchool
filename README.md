@@ -1271,4 +1271,4 @@ CupertinoSwitch是ios风格控件，用法和Switch一样:
  }
 ```
 
-#######  注:Switch.adaptive(value: value, onChanged: onChanged)类似 Slider.adaptive
+######  注:Switch.adaptive(value: value, onChanged: onChanged)类似 Slider.adaptive
