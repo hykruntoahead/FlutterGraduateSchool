@@ -764,6 +764,7 @@ RaisedButton、FlatButton、OutlineButton 基础用法如下：
 按钮有两种状态：**禁用状态**和**正常状态**。当onPressed不设置或者设置为 null 时为禁用状态，反之为正常状态，**禁用状态下不可点击**。
 
 | 属性 |	说明 |
+| --- | --- |
 | textColor | 正常状态下，字体颜色 |
 | color | 正常状态下，背景颜色 |
 | disabledTextColor | 禁用状态下，字体颜色 |
