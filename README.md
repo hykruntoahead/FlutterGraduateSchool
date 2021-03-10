@@ -930,7 +930,7 @@ activeColor是选中状态下颜色:
  )
 ```
 
-3.3 复选组件
+### 3.3 复选组件
 ##### Checkbox
 
 Checkbox是勾选框控件，本身不包含任何状态，改变状态需要通过改变value的值改变:
@@ -1191,7 +1191,7 @@ CupertinoSlider(
 
 [Slider实践代码](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/slider_demo.dart)
 
-### 2.5 开关组件
+### 3.5 开关组件
 #####  Switch
 Switch为material风格的开关组件，基本用法如下:
 ```
@@ -1272,3 +1272,47 @@ CupertinoSwitch是ios风格控件，用法和Switch一样:
 ```
 
 ######  注:Switch.adaptive(value: value, onChanged: onChanged)类似 Slider.adaptive
+
+
+### 3.6 进度组件
+##### LinearProgressIndicator
+```
+ LinearProgressIndicator()
+```
+设置具体进度值,value的值范围是0-1:
+```
+ LinearProgressIndicator(
+   value: 0.3,
+ )
+```
+设置背景颜色及进度值：
+```
+ LinearProgressIndicator(
+   value: 0.3,
+   backgroundColor: Colors.greenAccent,
+   valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+ )
+```
+
+##### CircularProgressIndicator
+CircularProgressIndicator 是圆形进度条，和LinearProgressIndicator用法一样：
+```
+ CircularProgressIndicator()
+```
+设置进度值及颜色值：
+```
+CircularProgressIndicator(
+  value: 0.3,
+  backgroundColor: Colors.greenAccent,
+  valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+) 
+```
+
+#####  CupertinoActivityIndicator
+CupertinoActivityIndicator是ios风格的指示器，CupertinoActivityIndicator不能设置进度，只能一直转“菊花”。
+```
+ CupertinoActivityIndicator(
+   radius: 10,
+ )
+```
+radius参数是半径，值越大，控件越大。
