@@ -1190,3 +1190,85 @@ CupertinoSlider(
 ```
 
 [Slider实践代码](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/slider_demo.dart)
+
+### 2.5 开关组件
+#####  Switch
+Switch为material风格的开关组件，基本用法如下:
+```
+ var _switchValue = false;
+ _buildSwitch(){
+   return Switch(
+     value: _switchValue,
+     onChanged: (value){
+       setState(() {
+         _switchValue = value;
+       });
+     },
+   );
+ }
+```
+设置激活状态下thumb及track颜色:
+```
+ Switch(
+       activeColor: Colors.red,
+       activeTrackColor: Colors.blue,
+       ...
+     ）
+```
+![效果图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/switch_active.png)
+
+红色区域为thumb，蓝色区域为track。
+
+
+thumb区域也可以设置图片:
+```
+ Switch(
+   activeThumbImage: AssetImage('images/bird.png',),
+   ...
+ )
+```
+有激活状态样式的设置，也有未激活样式的设置:
+```
+ Switch(
+   inactiveThumbColor: Colors.black54,
+   inactiveThumbImage: AssetImage('images/bird.png',),
+   inactiveTrackColor: Colors.blue,
+   ...
+ )
+```
+
+#####  SwitchListTile
+SwitchListTile是Switch和ListTile组合控件:
+```
+ var _switchValue = false;
+ _buildSwitch(){
+   return SwitchListTile(
+     title:Text('是否允许4G下载'),
+     value: _switchValue,
+     onChanged: (value){
+       setState(() {
+         _switchValue = value;
+       });
+     },
+   );
+ }
+```
+所有的属性都是Switch和ListTile属性的组合，可到具体控件查看其属性。
+
+#####  CupertinoSwitch
+CupertinoSwitch是ios风格控件，用法和Switch一样:
+```
+ var _switchValue = false;
+ _buildSwitch(){
+   return CupertinoSwitch(
+     value: _switchValue,
+     onChanged: (value){
+       setState(() {
+         _switchValue = value;
+       });
+     },
+   );
+ }
+```
+
+#######  注:Switch.adaptive(value: value, onChanged: onChanged)类似 Slider.adaptive

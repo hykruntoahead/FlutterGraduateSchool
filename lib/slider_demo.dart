@@ -73,7 +73,8 @@ class _SliderDemoState extends State<SliderDemo> {
                   _universalSliderValue = v;
                 });
               },
-            )
+            ),
+
           ],
         ),
       ),
