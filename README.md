@@ -720,3 +720,96 @@ _focusNode为TextField的focusNode：
 ### 2.4文本组件案例
 参见:  
 [text_widget_instances.dart](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/text_widget_instances.dart)
+
+
+## 3.基础组件
+
+### 3.1 按钮组件
+Flutter 提供了 10 多种 Button 类组件，比如 **RaisedButton**、**FlatButton**、**OutlineButton**、DropdownButton、RawMaterialButton、PopupMenuButton、**IconButton**、BackButton、CloseButton、ButtonBar、ToggleButtons等。
+
+以加粗这几个Button开始介绍.
+RaisedButton、FlatButton、OutlineButton 基础用法如下：
+```
+ RaisedButton(child: Text('RaisedButton'),onPressed: (){},),
+ FlatButton(child: Text('FlatButton'),color: Colors.blue,onPressed: (){},),
+ OutlineButton(child: Text('OutlineButton'),onPressed: (){},),
+```
+这3个组件的用法基本一样，仅仅是展示的外观效果不同，区别是：
+
+   - RaisedButton：Material风格”凸起“的按钮。
+   - FlatButton：扁平的按钮。
+   - OutlineButton：带边框的按钮。
+  
+以 RaisedButton 为例介绍， RaisedButton 有3个回调函数:
+    - onPressed：点击回调。
+    - onLongPress：长按回调。
+    - onHighlightChanged：按钮高亮变化回调，当点击或者按住按钮时，按钮出现水波纹效果，水波纹变化时就是高亮状态。
+    
+用法如下：
+```
+ RaisedButton(
+   child: Text('RaisedButton'),
+   onPressed: () {
+     print('onPressed');
+   },
+   onLongPress: () {
+     print('onLongPress');
+   },
+   onHighlightChanged: (highlight) {
+     print('onHighlightChanged:$highlight');
+   },
+ )
+```
+
+按钮有两种状态：**禁用状态**和**正常状态**。当onPressed不设置或者设置为 null 时为禁用状态，反之为正常状态，**禁用状态下不可点击**。
+
+| 属性 |	说明 |
+| textColor | 正常状态下，字体颜色 |
+| color | 正常状态下，背景颜色 |
+| disabledTextColor | 禁用状态下，字体颜色 |
+| disabledColor | 禁用状态下，背景颜色 |
+| highlightColor | 高亮颜色，按下时的颜色 |
+| splashColor | 水波纹颜色，按下时会有水波纹效果 |
+
+hover 相关的属性是鼠标悬停时的状态，移动端没有效果，比如 hoverColor 表示鼠标悬停时的颜色。
+和 focus 相关的属性是指获取焦点时的状态。
+这两种状态在 Android 和 iOS 端基本用不到.
+
+设置阴影：
+```
+ RaisedButton(
+   child: Text('RaisedButton'),
+   onPressed: () {
+   },
+   elevation: 10.0,
+ ),
+ 
+ RaisedButton(
+   child: Text('RaisedButton'),
+   onPressed: () {
+   },
+   
+   elevation: 1.0,
+ )
+```
+
+阴影设置为 10 和 1 效果还是很明显的，这是正常状态下的阴影，还有高亮阴影（**highlightElevation**）和禁用状态阴影（**disabledElevation**），用法一样。
+
+设置按钮形状：
+```
+RaisedButton(
+  child: Text('RaisedButton'),
+  onPressed: () {},
+  shape: BeveledRectangleBorder(
+      side: BorderSide(width: 1, color: Colors.red),
+      borderRadius: BorderRadius.circular(10)),
+  elevation: 1.0,
+)
+```
+flutter自带许多形状,可参见:
+[ShapeBorder](http://laomengit.com/flutter/widgets/ShapeBorder.html#beveledrectangleborder)
+
+IconButton 的用法和 RaisedButton 基本一样:
+```
+ IconButton(icon: Icon(Icons.add),)
+```
