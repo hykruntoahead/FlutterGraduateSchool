@@ -19,3 +19,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: maobi
+      fonts:
+        - asset: assets/fonts/maobi.ttf
