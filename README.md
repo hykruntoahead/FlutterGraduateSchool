@@ -1896,4 +1896,4 @@ Stack(
 
 **IndexedStack** 是 Stack 的子类，Stack 是将所有的子组件叠加显示，而 IndexedStack 通过 index 只显示指定索引的子组件:
 
-[IndexedStackDemo 示例](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/slider_demo.dart)
+[IndexedStackDemo 示例](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/layout_widget/indexed_stack_demo.dart)
