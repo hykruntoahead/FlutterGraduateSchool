@@ -1700,7 +1700,7 @@ spaceAround 和 spaceEvenly 区别是：
 
 ![row 交叉轴对齐方式](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/row_cross_axis_alignment.png)
 
-**mainAxisSize** 表示主轴尺寸，有 **min** 和 **max** 两种方式，默认是 max**。**min 表示尽可能小，max 表示尽可能大。
+**mainAxisSize** 表示主轴尺寸，有 **min** 和 **max** 两种方式，默认是 max。min 表示尽可能小，max 表示尽可能大。
 
 ![row mainAxisSize-min](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/row_cross_axis_alignment.png)
 
@@ -1764,4 +1764,136 @@ verticalDirection 表示子组件交叉轴布局方向：
 > 用于消除 MainAxisAlignment.start 和 CrossAxisAlignment.end 值的歧义
 
 
-### 4.2
+
+### 4.2 叠加布局组件-Stack/IndexedStack
+
+叠加布局组件包含 **Stack** 和 **IndexedStack，Stack** 组件将子组件叠加显示，根据子组件的顺序依次向上叠加:
+
+```
+Stack(
+  children: <Widget>[
+    Container(
+      height: 200,
+      width: 200,
+      color: Colors.red,
+    ),
+    Container(
+      height: 170,
+      width: 170,
+      color: Colors.blue,
+    ),
+    Container(
+      height: 140,
+      width: 140,
+      color: Colors.yellow,
+    )
+  ],
+)
+```
+
+
+Stack 对未定位（不被 Positioned 包裹）子组件的大小由 fit 参数决定，默认值是 StackFit.loose ，表示子组件自己决定，StackFit.expand 表示尽可能的大:
+```
+ Stack(
+   fit: StackFit.expand,
+   children: <Widget>[
+     Container(
+       height: 200,
+       width: 200,
+       color: Colors.red,
+     ),
+     Container(
+       height: 170,
+       width: 170,
+       color: Colors.blue,
+     ),
+     Container(
+       height: 140,
+       width: 140,
+       color: Colors.yellow,
+     )
+   ],
+ )
+```
+效果只有黄色（最后一个组件的颜色），并不是其他组件没有绘制，而是另外两个组件被黄色组件覆盖。
+
+Stack 对未定位（不被 Positioned 包裹）子组件的对齐方式由**alignment** 控制，默认左上角对齐，用法如下：
+
+``` 
+Stack(
+  alignment: AlignmentDirectional.center,
+  children: <Widget>[
+    Container(
+      height: 200,
+      width: 200,
+      color: Colors.red,
+    ),
+    Container(
+      height: 170,
+      width: 170,
+      color: Colors.blue,
+    ),
+    Container(
+      height: 140,
+      width: 140,
+      color: Colors.yellow,
+    )
+  ],
+)
+```
+通过 Positioned 定位的子组件：
+```
+ Stack(
+   alignment: AlignmentDirectional.center,
+   children: <Widget>[
+     Container(
+       height: 200,
+       width: 200,
+       color: Colors.red,
+     ),
+     Container(
+       height: 170,
+       width: 170,
+       color: Colors.blue,
+     ),
+     Positioned(
+       left: 30,
+       right: 40,
+       bottom: 50,
+       top: 60,
+       child: Container(
+         color: Colors.yellow,
+       ),
+     )
+   ],
+ )
+```
+**top** 、**bottom** 、**left** 、**right** 四种定位属性，分别表示距离上下左右的距离。
+
+
+如果子组件超过 Stack 边界由 overflow 控制，默认是裁剪，下面设置总是显示的用法：
+```
+ Stack(
+   overflow: Overflow.visible,
+   children: <Widget>[
+     Container(
+       height: 200,
+       width: 200,
+       color: Colors.red,
+     ),
+     Positioned(
+       left: 100,
+       top: 100,
+       height: 150,
+       width: 150,
+       child: Container(
+         color: Colors.green,
+       ),
+     )
+   ],
+ )
+```
+
+**IndexedStack** 是 Stack 的子类，Stack 是将所有的子组件叠加显示，而 IndexedStack 通过 index 只显示指定索引的子组件:
+
+[!IndexedStackDemo 示例](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/slider_demo.dart)
