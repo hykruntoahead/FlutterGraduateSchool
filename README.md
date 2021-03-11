@@ -1897,3 +1897,120 @@ Stack(
 **IndexedStack** 是 Stack 的子类，Stack 是将所有的子组件叠加显示，而 IndexedStack 通过 index 只显示指定索引的子组件:
 
 [IndexedStackDemo 示例](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/layout_widget/indexed_stack_demo.dart)
+
+
+###4.3　 流式布局组件－Wrap
+ 
+ **Wrap** 为子组件进行水平或者垂直方向布局，且当空间用完时，Wrap 会自动换行，也就是流式布局。
+ 
+ 创建多个子控件做为 Wrap 的子控件:
+ ```
+  Wrap(
+    children: List.generate(10, (i) {
+      double w = 50.0 + 10 * i;
+      return Container(
+        color: Colors.primaries[i],
+        height: 50,
+        width: w,
+        child: Text('$i'),
+      );
+    }),
+  )
+ ```
+ 
+ **direction** 属性控制布局方向，默认为水平方向，设置方向为垂直代码:
+ ```
+   Wrap(
+     direction: Axis.vertical,
+     children: List.generate(4, (i) {
+       double w = 50.0 + 10 * i;
+       return Container(
+         color: Colors.primaries[i],
+         height: 50,
+         width: w,
+         child: Text('$i'),
+       );
+     }),
+   )  
+ ```
+
+**alignment** 属性控制主轴对齐方式，**crossAxisAlignment** 属性控制交叉轴对齐方式，对齐方式只对有剩余空间的行或者列起作用，例如水平方向上正好填充完整，则不管设置主轴对齐方式为什么，看上去的效果都是铺满.
+
+>说明 ：主轴就是与当前组件方向一致的轴，而交叉轴就是与当前组件方向垂直的轴，如果Wrap的布局方向为水平方向 Axis.horizontal,那么主轴就是水平方向，反之布局方向为垂直方向 Axis.vertical ，主轴就是垂直方向。
+
+```
+Wrap(
+	alignment: WrapAlignment.spaceBetween,
+	...
+) 
+```
+主轴对齐方式有6种:
+![wrap 主轴对齐](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/wrap_main_axis_alignment.jpg)
+
+**spaceAround** 和 **spaceEvenly** 区别是：
+- spaceAround：第一个子控件距开始位置和最后一个子控件距结尾位置是其他子控件间距的一半。
+- spaceEvenly：所有间距一样。
+设置交叉轴对齐代码如下：
+
+```
+Wrap(
+	crossAxisAlignment: WrapCrossAlignment.center,
+	...
+)     
+```
+如果 Wrap 的主轴方向为水平方向，交叉轴方向则为垂直方向，如果想要看到交叉轴对齐方式的效果需要设置子控件的高不一样:
+```
+ Wrap(
+   spacing: 5,
+   runSpacing: 3,
+   crossAxisAlignment: WrapCrossAlignment.center,
+   children: List.generate(10, (i) {
+     double w = 50.0 + 10 * i;
+     double h = 50.0 + 5 * i;
+     return Container(
+       color: Colors.primaries[i],
+       height: h,
+       alignment: Alignment.center,
+       width: w,
+       child: Text('$i'),
+     );
+   }),
+ )
+```
+
+**runAlignment** 属性控制 Wrap 的交叉抽方向上每一行的对齐方式，下面直接看 runAlignment 6中方式对应的效果图:
+
+![runAlignment](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/wrap_run_alignment.jpg)
+
+runAlignment 和 alignment 的区别：
+- **alignment** ：是主轴方向上对齐方式，作用于每一行。
+- **runAlignment** ：是交叉轴方向上将每一行看作一个整体的对齐方式。
+
+**spacing** 和 **runSpacing** 属性控制Wrap主轴方向和交叉轴方向子控件之间的间隙:
+```
+ Wrap(
+ 	spacing: 5,
+     runSpacing: 2,
+ 	...
+ )
+```
+
+**textDirection** 属性表示 Wrap 主轴方向上子组件的方向，取值范围是 ltr（从左到右） 和 rtl（从右到左），下面是从右到左：
+```
+ Wrap(
+ 	textDirection: TextDirection.rtl,
+ 	...
+ )
+```
+
+**verticalDirection** 属性表示 Wrap 交叉轴方向上子组件的方向，取值范围是 up（向上） 和 down（向下）:
+``` 
+Wrap(
+	verticalDirection: VerticalDirection.up,
+	...
+)
+```
+
+![verticalDirection up](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/wrap_vertical_up.png)
+
+

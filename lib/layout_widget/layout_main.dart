@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app_demo/layout_widget/indexed_stack_demo.dart';
+import 'package:flutter_app_demo/layout_widget/wrap_layout_demo.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,7 +17,8 @@ class MyApp extends StatelessWidget {
             bodyText2: TextStyle(color: Colors.black, fontSize: 16),
           )),
       home:Scaffold(
-        body: IndexedStackDemo(),
+        body: WrapDemo()
+        // IndexedStackDemo(),
       )
     );
   }
