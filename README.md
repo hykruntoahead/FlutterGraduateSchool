@@ -2,18 +2,7 @@
 
 A new Flutter project.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Flutter　学习实践
 
 ## 1.跨平台开发演进及准备工作
 
@@ -2014,3 +2003,4 @@ Wrap(
 ![verticalDirection up](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/wrap_vertical_up.png)
 
 
+###### 注意：从图示可以看到，文字为0的组件是在下面的。
