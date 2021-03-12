@@ -1704,7 +1704,7 @@ spaceAround 和 spaceEvenly 区别是：
    decoration: BoxDecoration(border: Border.all(color: Colors.black)),
    child: Row(
      textDirection: TextDirection.rtl,
-     children: <Widget>[
+     children: <Widget>[每一个子组件比上一个组件向下偏移30。
        ...
      ],
    ),
@@ -2006,7 +2006,7 @@ Wrap(
 ###### 注意：从图示可以看到，文字为0的组件是在下面的。
 
 
-###4.4 自定义布局组件-Flow
+### 4.4 自定义布局组件-Flow
 
 大部分情况下，不会使用到 **Flow** ，但 Flow 可以调整子组件的位置和大小，结合Matrix4绘制出各种酷炫的效果。
 
