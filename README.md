@@ -2065,3 +2065,6 @@ delegate 要继承 **FlowDelegate**，重写 **paintChildren** 和 **shouldRepai
 
 每一个子组件比上一个组件向下偏移30。
 
+
+### 4.5 布局案例－仿 掘金-我 效果
+[仿　掘金－我效果](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/layout_widget/imitation_nuggets_i_effect.dart)

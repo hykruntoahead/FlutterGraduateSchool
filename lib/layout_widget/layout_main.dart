@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app_demo/layout_widget/imitation_nuggets_i_effect.dart';
 import 'package:flutter_app_demo/layout_widget/indexed_stack_demo.dart';
 import 'package:flutter_app_demo/layout_widget/wrap_layout_demo.dart';
 
@@ -17,7 +18,8 @@ class MyApp extends StatelessWidget {
             bodyText2: TextStyle(color: Colors.black, fontSize: 16),
           )),
       home:Scaffold(
-        body: WrapDemo()
+        body: SettingDemo()
+        // WrapDemo()
         // IndexedStackDemo(),
       )
     );
