@@ -2004,3 +2004,64 @@ Wrap(
 
 
 ###### 注意：从图示可以看到，文字为0的组件是在下面的。
+
+
+###4.4 自定义布局组件-Flow
+
+大部分情况下，不会使用到 **Flow** ，但 Flow 可以调整子组件的位置和大小，结合Matrix4绘制出各种酷炫的效果。
+
+Flow 组件对使用转换矩阵操作子组件经过系统优化，性能非常高效:
+```
+ Flow(
+   delegate: SimpleFlowDelegate(),
+   children: List.generate(5, (index) {
+     return Container(
+       height: 100,
+       color: Colors.primaries[index % Colors.primaries.length],
+     );
+   }),
+ )
+```
+delegate 控制子组件的位置和大小，定义如下 ：
+
+```
+ class SimpleFlowDelegate extends FlowDelegate {
+   @override
+   void paintChildren(FlowPaintingContext context) {
+     for (int i = 0; i < context.childCount; ++i) {
+       context.paintChild(i);
+     }
+   }
+ 
+   @override
+   bool shouldRepaint(SimpleFlowDelegate oldDelegate) {
+     return false;
+   }
+ }
+
+```
+delegate 要继承 **FlowDelegate**，重写 **paintChildren** 和 **shouldRepaint** 函数，上面直接绘制子组件，效果如下：
+
+![FlowDelegate](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/flow_p1.png)
+
+只看到一种颜色并不是只绘制了这一个，而是叠加覆盖了，和 Stack 类似，下面让每一个组件有一定的偏移，**SimpleFlowDelegate** 修改如下：
+
+```
+ class SimpleFlowDelegate extends FlowDelegate {
+   @override
+   void paintChildren(FlowPaintingContext context) {
+     for (int i = 0; i < context.childCount; ++i) {
+       context.paintChild(i,transform: Matrix4.translationValues(0,i*30.0,0));
+     }
+   }
+ 
+   @override
+   bool shouldRepaint(SimpleFlowDelegate oldDelegate) {
+     return false;
+   }
+ }
+```
+![FlowDelegate](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/flow_p2.png)
+
+每一个子组件比上一个组件向下偏移30。
+
