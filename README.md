@@ -2073,3 +2073,4 @@ delegate 要继承 **FlowDelegate**，重写 **paintChildren** 和 **shouldRepai
 [水平展开/收起菜单](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/layout_widget/expand_collapse_menu_horizontally.dart)
 
 ### 4.7 布局案例－　半圆菜单展开/收起
+[半圆菜单展开/收起](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/layout_widget/half_circle_menu_demo.dart) 
