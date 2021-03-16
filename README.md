@@ -2557,4 +2557,8 @@ Spacer 的本质也是 Expanded 的实现的，和Expanded的区别是：Expande
   - Spacer 用于撑开 Row、Column、Flex 的子组件的空隙。
 
 
+### 5.6 案例－　仿掘金个人信息效果
+[仿掘金个人信息效果](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/position_decoration_widget/personal_info.dart)
 
+### 5.7 案例－　柱状图
+[柱状图](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/position_decoration_widget/histogram.dart) 
