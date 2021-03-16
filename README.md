@@ -2296,3 +2296,20 @@ SizedBox 可以没有子组件，但仍然会占用空间，所以 SizedBox 非�
            ],
          )
 ```
+
+### 5.3 宽高比组件-AspectRatio
+AspectRatio 是固定宽高比的组件:
+```
+  Container(
+          height: 300,
+          width: 300,
+          color: Colors.blue,
+          alignment: Alignment.center,
+          child: AspectRatio(
+            aspectRatio: 2 / 1,
+            child: Container(color: Colors.red,),
+          ),
+        )
+```
+
+aspectRatio 是宽高比，可以直接写成分数的形式，也可以写成小数的形式，但建议写成分数的形式，可读性更高. 
