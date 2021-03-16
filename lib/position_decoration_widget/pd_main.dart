@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app_demo/position_decoration_widget/histogram.dart';
 import 'package:flutter_app_demo/position_decoration_widget/personal_info.dart';
 
 void main() {
@@ -17,7 +18,8 @@ class MyApp extends StatelessWidget {
               bodyText2: TextStyle(color: Colors.black, fontSize: 16),
             )),
         home:Scaffold(
-            body: PersonalDemo()
+            body: CylinderChart()
+            // PersonalDemo()
         )
     );
   }
