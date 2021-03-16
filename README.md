@@ -2313,3 +2313,32 @@ AspectRatio 是固定宽高比的组件:
 ```
 
 aspectRatio 是宽高比，可以直接写成分数的形式，也可以写成小数的形式，但建议写成分数的形式，可读性更高. 
+
+
+### 5.4 相对父组件尺寸 - FractionallySizedBox
+
+**FractionallySizedBox** 是一个相对父组件尺寸的组件，比如占父组件的70%：
+``` 
+ Container(
+   height: 200,
+   width: 200,
+   color: Colors.blue,
+   child: FractionallySizedBox(
+     widthFactor: .8,
+     heightFactor: .3,
+     child: Container(
+       color: Colors.red,
+     ),
+   ),
+ )
+```
+通过 alignment 参数控制子组件显示的位置，默认为居中:
+```
+  FractionallySizedBox(
+    alignment: Alignment.center,
+    ...
+  )
+```
+
+
+
