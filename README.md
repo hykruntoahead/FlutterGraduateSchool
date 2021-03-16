@@ -2341,4 +2341,220 @@ aspectRatio 是宽高比，可以直接写成分数的形式，也可以写成�
 ```
 
 
+### 5.5 权重组件- Expanded、Flexible 和 Spacer
+
+**Expanded、Flexible 和 Spacer** 都是具有权重属性的组件，可以控制 Row、Column、Flex 的子控件如何布局的组件.
+
+Flexible 组件可以控制 Row、Column、Flex 的子控件占满父组件，比如，Row 中有3个子组件，两边的宽是100，中间的占满剩余的空间:
+```
+ Row(
+       children: <Widget>[
+         Container(
+           color: Colors.blue,
+           height: 50,
+           width: 100,
+         ),
+         Flexible(
+             child: Container(
+               color: Colors.red,
+               height: 50,
+             )
+         ),
+         Container(
+           color: Colors.blue,
+           height: 50,
+           width: 100,
+         ),
+       ],
+     )
+```
+
+还是有3个子组件，第一个占1/6，第二个占2/6，第三个占3/6:
+```
+ Column(
+       children: <Widget>[
+         Flexible(
+           flex: 1,
+           child: Container(
+             color: Colors.blue,
+             alignment: Alignment.center,
+             child: Text('1 Flex/ 6 Total',style: TextStyle(color: Colors.white),),
+           ),
+         ),
+         Flexible(
+           flex: 2,
+           child: Container(
+             color: Colors.red,
+             alignment: Alignment.center,
+             child: Text('2 Flex/ 6 Total',style: TextStyle(color: Colors.white),),
+           ),
+         ),
+         Flexible(
+           flex: 3,
+           child: Container(
+             color: Colors.green,
+             alignment: Alignment.center,
+             child: Text('3 Flex/ 6 Total',style: TextStyle(color: Colors.white),),
+           ),
+         ),
+       ],
+     )
+```
+
+子组件占比 = 当前子控件 flex / 所有子组件 flex 之和。
+
+Flexible中 **fit** 参数表示填满剩余空间的方式，说明如下：
+    - tight：必须（强制）填满剩余空间。
+    - loose：尽可能大的填满剩余空间，但是可以不填满。
+    
+这2个看上去不是很好理解啊，什么叫尽可能大的填满剩余空间？什么时候填满？看下面的例子：
+```
+  Row(
+        children: <Widget>[
+          Container(
+            color: Colors.blue,
+            height: 50,
+            width: 100,
+          ),
+          Flexible(
+              child: Container(
+                color: Colors.red,
+                height: 50,
+  			  child: Text('Container',style: TextStyle(color: Colors.white),),
+              )
+          ),
+          Container(
+            color: Colors.blue,
+            height: 50,
+            width: 100,
+          ),
+        ],
+      )
+```
+![flexible_contariner_0](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/flexible_contariner_0.png)
+
+这段代码是在最上面代码的基础上给中间的红色Container添加了Text子控件，此时红色Container就不在充满空间，再给Container添加对齐方式，代码如下：
+```
+ Row(
+       children: <Widget>[
+         Container(
+           color: Colors.blue,
+           height: 50,
+           width: 100,
+         ),
+         Flexible(
+             child: Container(
+               color: Colors.red,
+               height: 50,
+ 			  alignment: Alignment.center,
+ 			  child: Text('Container',style: TextStyle(color: Colors.white),),
+             )
+         ),
+         Container(
+           color: Colors.blue,
+           height: 50,
+           width: 100,
+         ),
+       ],
+     )
+```
+![flexible_contariner_1](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/flexible_contariner_1.png)
+
+此时又填满剩余空间。
+
+大家是否还记得 Container 组件的大小是如何调整的吗？Container 默认是适配子控件大小的，但当设置对齐方式时 Container 将会填满父组件，因此是否填满剩余空间取决于子组件是否需要填满父组件。
+
+如果把 Flexible 中子组件由 Container 改为 OutlineButton，代码如下：
+```
+  Row(
+        children: <Widget>[
+          Container(
+            color: Colors.blue,
+            height: 50,
+            width: 100,
+          ),
+          Flexible(
+            child: OutlineButton(
+              child: Text('OutlineButton'),
+            ),
+          ),
+          Container(
+            color: Colors.blue,
+            height: 50,
+            width: 100,
+          ),
+        ],
+      )
+```
+OutlineButton 正常情况下是不充满父组件的，因此最终的效果应该是不填满剩余空间：
+![flexible_outline_button](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/flexible_outline_button.png)
+
+
+下面再来介绍另一个权重组件**Expanded** ，源代码如下：
+``` 
+ class Expanded extends Flexible {
+   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
+   /// so that the child fills the available space along the flex widget's
+   /// main axis.
+   const Expanded({
+     Key key,
+     int flex = 1,
+     @required Widget child,
+   }) : super(key: key, flex: flex, fit: FlexFit.tight, child: child);
+ }
+```
+Expanded 继承字 Flexible，fit 参数固定为 **FlexFit.tight**，也就是说 Expanded 必须（强制）填满剩余空间。上面的 OutlineButton 想要充满剩余空间可以直接使用 Expanded ：
+
+```
+ Row(
+       children: <Widget>[
+         Container(
+           color: Colors.blue,
+           height: 50,
+           width: 100,
+         ),
+         Expanded(
+           child: OutlineButton(
+             child: Text('OutlineButton'),
+           ),
+         ),
+         Container(
+           color: Colors.blue,
+           height: 50,
+           width: 100,
+         ),
+       ],
+     ) 
+```
+![flexible_outline_button_expanded](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/flexible_outline_button_expanded.png)
+
+**Spacer** 也是一个权重组件，源代码如下：
+```
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: flex,
+      child: const SizedBox.shrink(),
+    );
+  }
+```
+Spacer 的本质也是 Expanded 的实现的，和Expanded的区别是：Expanded 可以设置子控件，而 Spacer 的子控件尺寸是0，因此**Spacer适用于撑开 Row、Column、Flex 的子控件的空隙**，用法如下：
+
+```
+  Row(
+    children: <Widget>[
+      Container(width: 100,height: 50,color: Colors.green,),
+      Spacer(flex: 2,),
+      Container(width: 100,height: 50,color: Colors.blue,),
+      Spacer(),
+      Container(width: 100,height: 50,color: Colors.red,),
+    ],
+  )
+```
+**三个权重组建总结如下：**
+  - Spacer 是通过 Expanded 实现的，Expanded继承自Flexible。
+  - 填满剩余空间直接使用Expanded更方便。
+  - Spacer 用于撑开 Row、Column、Flex 的子组件的空隙。
+
+
 
