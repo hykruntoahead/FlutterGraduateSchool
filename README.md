@@ -2074,3 +2074,182 @@ delegate 要继承 **FlowDelegate**，重写 **paintChildren** 和 **shouldRepai
 
 ### 4.7 布局案例－　半圆菜单展开/收起
 [半圆菜单展开/收起](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/layout_widget/half_circle_menu_demo.dart) 
+
+
+## 5 定位装饰权重组件
+
+### 5.1 定位装饰组件 - Container
+
+**Container** 是最常用的组件之一，它是单容器类组件，即**仅能包含一个子组件，用于装饰和定位子组件**，例如设置背景颜色、形状等。
+```
+ Container(
+ 	child: Text('ykhe'),
+  )
+
+```
+
+设置背景颜色：
+```
+ Container(
+ 	color: Colors.blue,
+     child: Text('ykhe'),
+ )
+
+```
+设置内边距(**padding**) 和 外边距(**margin**):
+```
+Container(
+      color: Colors.blue,
+      child: Container(
+        margin: EdgeInsets.all(10),
+        padding: EdgeInsets.all(20),
+        color: Colors.red,
+        child: Text('ykhe'),
+      ),
+    ) 
+```
+
+**decoration** 属性设置子组件的背景颜色、形状等。设置背景为圆形，颜色为蓝色：
+```
+ Container(
+   child: Text('学习与分享Flutter技术及应用'),
+   decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
+ )
+```
+默认情况下，圆形的直径等于 Container 窄边长度，相当于在矩形内绘制内切圆。
+
+绘制背景是圆角矩形：
+```
+ Container(
+         child: Text('学习与分享Flutter技术及应用'),
+         padding: EdgeInsets.symmetric(horizontal: 10),
+         decoration: BoxDecoration(
+             shape: BoxShape.rectangle,
+             borderRadius: BorderRadius.all(Radius.circular(20)),
+             color: Colors.blue),
+       )
+```
+
+除了背景我们可以设置边框效果:
+```
+ Container(
+         child: Text('老孟，专注分享Flutter技术及应用'),
+         padding: EdgeInsets.symmetric(horizontal: 10),
+         decoration: BoxDecoration(
+           borderRadius: BorderRadius.circular(12),
+           border: Border.all(
+             color: Colors.blue,
+             width: 2,
+           ),
+         ),
+       )
+```
+
+创建圆角图片和圆形图片：
+```
+ Container(
+       height: 200,
+       width: 200,
+       decoration: BoxDecoration(
+         image:  DecorationImage(
+           image: NetworkImage(
+               'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+           fit: BoxFit.cover,
+         ),
+         border: Border.all(
+           color: Colors.blue,
+           width: 2,
+         ),
+         borderRadius: BorderRadius.circular(12),
+       ),
+     )
+```
+ 修改其形状为圆形:
+ ```
+   Container(
+         height: 200,
+         width: 200,
+         decoration: BoxDecoration(
+           image: DecorationImage(
+             image: NetworkImage(
+                 'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+             fit: BoxFit.cover,
+           ),
+           border: Border.all(
+             color: Colors.blue,
+             width: 2,
+           ),
+           shape: BoxShape.circle,
+         ),
+       )
+ ```
+
+设置对齐方式为居中，背景色为蓝色:
+```
+ Container(
+         color: Colors.blue,
+         child: Text('一个有态度的程序员'),
+         alignment: Alignment.center,
+       )
+```
+
+>注意：设置对齐方式后，Container将会充满其父控件，相当于Android中 match_parent 。
+
+**Alignment** 已经封装了常用的位置:
+
+topLeft; topCenter; topRight; 
+centerLeft; center; centerRight;
+bottomLeft; bottomCenter; bottomRight;
+
+通过名字就知道其位置，这里要介绍一下其他的位置，比如在距离左上角1/4处：
+```
+ Container(
+   alignment: Alignment(-.5,-.5),
+   child: Text('分享Flutter技术及应用'),
+ )
+
+```
+
+这里有一个非常重要的坐标系，Alignment 坐标系如下：
+![alignment_coordinate_system](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/alignment_coordinate_system.png)
+
+设置固定的宽高属性：
+```
+ Container(
+         color: Colors.blue,
+         child: Text('分享Flutter技术及应用'),
+         alignment: Alignment.center,
+         height: 60,
+         width: 250,
+       )
+```
+通过 **constraints** 属性设置最大/小宽、高来确定大小，如果不设置，默认最小宽高是0，最大宽高是无限大（double.infinity），约束width代码如下：
+```
+ Container(
+         color: Colors.blue,
+         child: Text('分享Flutter技术及应用'),
+         alignment: Alignment.center,
+         constraints: BoxConstraints(
+           maxHeight: 100,
+           maxWidth: 300,
+           minHeight: 100,
+           minWidth: 100,
+         ),
+       )
+```
+
+通过**transform**可以旋转、平移、缩放Container，旋转代码如下：
+```
+  Container(
+          color: Colors.blue,
+          child: Text('分享Flutter技术及应用'),
+          alignment: Alignment.center,
+          height: 60,
+          width: 250,
+          transform: Matrix4.rotationZ(0.5),
+        )
+```
+
+> 注意：Matrix4.rotationZ()参数的单位是弧度而不是角度
+
+
