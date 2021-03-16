@@ -2211,6 +2211,8 @@ bottomLeft; bottomCenter; bottomRight;
 ```
 
 这里有一个非常重要的坐标系，Alignment 坐标系如下：
+
+
 ![alignment_coordinate_system](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/alignment_coordinate_system.png)
 
 设置固定的宽高属性：
