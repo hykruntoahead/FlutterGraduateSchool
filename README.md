@@ -2255,3 +2255,44 @@ bottomLeft; bottomCenter; bottomRight;
 > 注意：Matrix4.rotationZ()参数的单位是弧度而不是角度
 
 
+### 5.2 固定宽高组件-SizeBox
+
+**SizedBox** 是具有固定宽高的组件，直接指定具体的宽高:
+```
+ SizedBox(
+         height: 60,
+         width: 200,
+         child: Container(
+           color: Colors.blue,
+           alignment: Alignment.center,
+           child: Text('分享Flutter技术及应用'),
+         ),
+       )
+```
+
+设置尺寸无限大，如下：
+```
+ SizedBox(
+   height: double.infinity,
+   width: double.infinity,
+   ...
+ )
+```
+
+虽然设置了无限大，子控件是否会无限长呢？不，不会，子控件依然会受到父组件的约束，会扩展到父组件的尺寸，还有一个便捷的方式设置此方式：
+```
+ SizedBox.expand(
+   child: Text('分享Flutter技术及应用'),
+ )
+```
+
+SizedBox 可以没有子组件，但仍然会占用空间，所以 SizedBox 非常适合控制2个组件之间的空隙:
+```
+ Column(
+           children: <Widget>[
+             Container(height: 30,color: Colors.blue,),
+             SizedBox(height: 30,),
+             Container(height: 30,color: Colors.red,),
+           ],
+         )
+```
