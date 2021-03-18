@@ -2715,7 +2715,7 @@ Spacer 的本质也是 Expanded 的实现的，和Expanded的区别是：Expande
 ```
 
 
-### 手势识别组件 - Ink/InkWell
+### 6.2 手势识别组件 - Ink/InkWell
 
 **InkWell** 组件在用户点击时出现“水波纹”效果，InkWell简单用法：
 ```
