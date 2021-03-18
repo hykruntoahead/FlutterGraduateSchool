@@ -2654,7 +2654,8 @@ Spacer 的本质也是 Expanded 的实现的，和Expanded的区别是：Expande
 ```
 用户按下->移动->抬起的过程调用如下：
 ```
- onLongPressStart->onLongPress->onLongPressMoveUpdate->... ->onLongPressMoveUpdate-> onLongPressEnd-> onLongPressUp
+ onLongPressStart->onLongPress->onLongPressMoveUpdate->... ->onLongPressMoveUpdate
+  -> onLongPressEnd-> onLongPressUp
 ```
 
 ##### 水平/垂直拖动事件
@@ -2684,7 +2685,8 @@ Spacer 的本质也是 Expanded 的实现的，和Expanded的区别是：Expande
 ```
 用户垂直方向拖动调用顺序如下：
 ```
-  onVerticalDragDown->onVerticalDragStart->onVerticalDragUpdate-> … -> onVerticalDragUpdate-> onVerticalDragEnd
+  onVerticalDragDown->onVerticalDragStart->onVerticalDragUpdate-> … -> onVerticalDragUpdate->
+  onVerticalDragEnd
 ```
 
 ##### 缩放事件
