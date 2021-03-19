@@ -3457,6 +3457,8 @@ class User {
       ], rows: dateRows);
 ```
 
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/data_select_.png)
+
 我们并没有对表头的全选/取消全选勾选框进行控制，一个很大的疑问：点击全选/取消全选勾选框，如果都勾选了，真实数据是否也发生变化了，对应本示例就是User中的selected参数是否全部为true，可以肯定的告诉你User中的selected参数已经全部变为true了，那是如何实现的呢？非常简单，每一行的onSelectChanged都被回调了一次。
 
 ##### DataCell
@@ -3591,3 +3593,6 @@ DateTable本身是没有排序功能的，当用户点击表头时对数据按�
     ], rows: dateRows),
   );
 ```
+
+### 7.6　自定义PageView　切换动画
+[PageView切换动画](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/scroll_component/pageview_switch_animation.dart)
