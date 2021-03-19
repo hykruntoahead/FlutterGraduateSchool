@@ -3052,7 +3052,7 @@ ListView.builder(
 - SliverGridDelegateWithFixedCrossAxisCount：交叉轴方向上固定数量，对于垂直方向的GridView来说交叉轴方向指的是水平方向。
 - SliverGridDelegateWithMaxCrossAxisExtent：交叉轴方向上尽量大，比如水平方上有500空间，指定此值为150，那么可以放3个，剩余一些空间，此时GridView将会缩小每一个Item，放置4个。
 
-SliverGridDelegateWithFixedCrossAxisCount有属性介绍如下：
+**SliverGridDelegateWithFixedCrossAxisCount**属性介绍如下：
 - crossAxisCount：交叉轴方向上个数。
 - mainAxisSpacing：主轴方向上2行之间的间隔。
 - crossAxisSpacing：交叉轴方向上之间的间隔。
@@ -3082,6 +3082,8 @@ reverse表示是否反转滚动方向，比如当前滚动方向是垂直方向�
     ...
   )
 ```
+
+##### 快速构建GridView
 
 GridView提供了一些快速构建的方法，比如**builder**，用法如下：
 ```
