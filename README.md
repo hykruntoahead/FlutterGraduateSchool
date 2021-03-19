@@ -3204,7 +3204,7 @@ PageView 控件可以实现一个“图片轮播”的效果，PageView 不仅�
      ],
  ) 
 ```
-![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_1.png)
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_1.gif)
 
 PageView滚动方向默认是水平，可以设置其为垂直方向：
 ``` 
@@ -3245,7 +3245,7 @@ PageView滚动到最后时希望滚动到第一个页面，这样看起来PageVi
   )
 ```
 巧妙的利用取余重复构建页面实现PageView无限滚动的效果：
-![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_loop.png)
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_loop.gif)
 
 ##### 实现指示器
 指示器显示总数和当前位置，通过**onPageChanged**确定当前页数并更新指示器:
@@ -3310,7 +3310,7 @@ PageView滚动到最后时希望滚动到第一个页面，这样看起来PageVi
     }
 ```
 效果如下:
-![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_dot.png)
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_dot.gif)
 
 
 
