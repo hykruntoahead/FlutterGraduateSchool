@@ -2854,4 +2854,4 @@ Listener的事件介绍如下：
 [进度按钮](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/gesture_recognition/login_progress_button.dart)
 
 6.5 手势识别组件案例　- 画板
-[进度按钮](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/gesture_recognition/drawing_board.dart)
+[画板](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/gesture_recognition/drawing_board.dart)
