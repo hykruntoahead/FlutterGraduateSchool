@@ -2942,7 +2942,7 @@ ListView.builder(
   itemExtent: 50,
 )  
 ```
-**ScrollController** 是 ListView 组件的控制器，通过 ScrollController 可以获取当前滚动的位置，也可以滚动到指定的位置:
+**ScrollController** 是 ListView 组件的控制器，通过 ScrollController 可以获取当前滚动的位置，也可以**滚动到指定的位置**:
 
 ```
   class _ListViewDemoState extends State<ListViewDemo> {
@@ -2975,6 +2975,7 @@ ListView.builder(
 ```
 
 跳转到指定位置：
+
 ```
   @override
   Widget build(BuildContext context) {
