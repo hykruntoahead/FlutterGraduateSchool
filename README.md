@@ -2855,3 +2855,166 @@ Listener的事件介绍如下：
 
 6.5 手势识别组件案例　- 画板
 [画板](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/gesture_recognition/drawing_board.dart)
+
+
+## 7.滚动和大数据组件
+
+### 7.1-ListView
+**ListView** 是滚动组件，常用组件之一，用于展示大量数据的列表。
+数据较少时，可以直接使用如下方式：
+```
+  ListView(
+    children: <Widget>[
+      _ListItem(title: '1',),
+      _ListItem(title: '2',),
+      _ListItem(title: '3',),
+      _ListItem(title: '4',),
+      _ListItem(title: '5',),
+      _ListItem(title: '6',),
+    ],
+  ) 
+```
+_ListItem 定义如下：
+```
+  class _ListItem extends StatelessWidget {
+  
+    final String title;
+  
+    const _ListItem({Key key, this.title}) : super(key: key);
+    @override
+    Widget build(BuildContext context) {
+      return Card(
+        child: Container(
+          height: 45,
+          alignment: Alignment.center,
+          child: Text('$title'),
+        ),
+      );
+    }
+  }
+```
+
+这种方式一次加载所有的组件，没有“懒加载”，因此当有大量数据时，使用动态创建列表的方式：
+``` 
+ ListView.builder(
+   itemBuilder: (BuildContext context, int index) {
+     return _ListItem(
+       title: '$index',
+     );
+   },
+   itemExtent: 50,
+ )
+```
+**itemExtent** 表示每一个Item的高度。
+
+**itemCount** 表示个数。
+在每一项中间增加分割线可以使用如下方式：
+```
+  ListView.separated(
+    itemBuilder: (BuildContext context, int index) {
+      return Container(
+        height: 45,
+        alignment: Alignment.center,
+        child: Text('$index'),
+      );
+    },
+    separatorBuilder: (BuildContext context, int index){
+      return Divider();
+    },
+    itemCount: 30,
+  
+  )
+```
+**scrollDirection** 表示滚动方向，默认是垂直方向，可以设置为水平方向。
+
+**reverse** 表示是否反转滚动方向，比如当前滚动方向是垂直方向，reverse : true，滚动方向为从上倒下，reverse:false，滚动方向为从下倒上。
+
+```
+ListView.builder(
+  scrollDirection: Axis.horizontal,
+  reverse: false,
+  itemBuilder: (BuildContext context, int index) {
+    return _ListItem(
+      title: '$index',
+    );
+  },
+  itemCount: 30,
+  itemExtent: 50,
+)  
+```
+**ScrollController** 是 ListView 组件的控制器，通过 ScrollController 可以获取当前滚动的位置，也可以滚动到指定的位置:
+
+```
+  class _ListViewDemoState extends State<ListViewDemo> {
+    ScrollController _controller;
+  
+    @override
+    void initState() {
+      _controller = ScrollController()
+        ..addListener(() {
+          print('${_controller.position}');
+        });
+      super.initState();
+    }
+  
+    @override
+    Widget build(BuildContext context) {
+      return ListView.builder(
+        controller: _controller,
+        reverse: false,
+        itemBuilder: (BuildContext context, int index) {
+          return _ListItem(
+            title: '$index',
+          );
+        },
+        itemCount: 30,
+        itemExtent: 50,
+      );
+    }
+  }
+```
+
+跳转到指定位置：
+```
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Container(
+          child: RaisedButton(
+            child: Text('滚动到指定位置'),
+            onPressed: () {
+              _controller.animateTo(200,
+                  duration: Duration(milliseconds: 300), curve: Curves.linear);
+            },
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            controller: _controller,
+            reverse: false,
+            itemBuilder: (BuildContext context, int index) {
+              return _ListItem(
+                title: '$index',
+              );
+            },
+            itemCount: 30,
+            itemExtent: 50,
+          ),
+        )
+      ],
+    );
+  }
+```
+**physics** 参数表示当滚动到顶部或者底部时滚动的物理特性，比如设置为不可滚动：
+```
+  GridView(
+      physics: NeverScrollableScrollPhysics(),
+    ···
+  )
+```
+系统提供的ScrollPhysics有：
+- AlwaysScrollableScrollPhysics：总是可以滑动
+- NeverScrollableScrollPhysics：禁止滚动
+- BouncingScrollPhysics ：内容超过一屏 上拉有回弹效果
+- ClampingScrollPhysics ：包裹内容 不会有回弹
