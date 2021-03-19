@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app_demo/gesture_recognition/drawing_board.dart';
 import 'package:flutter_app_demo/gesture_recognition/login_progress_button.dart';
 
 
@@ -17,7 +18,8 @@ class MyApp extends StatelessWidget {
               bodyText2: TextStyle(color: Colors.black, fontSize: 16),
             )),
         home:Scaffold(
-            body: LoginProgressDemo()
+            body: DrawingBoard()
+            // LoginProgressDemo()
         )
     );
   }
