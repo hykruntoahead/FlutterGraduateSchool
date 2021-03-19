@@ -3312,5 +3312,282 @@ PageView滚动到最后时希望滚动到第一个页面，这样看起来PageVi
 效果如下:
 ![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_dot.gif)
 
+### 7.5 DataTable 
+
+DataTable控件显示**表格数据**，DataTable需要设置行和列，用法如下：
+```
+ DataTable(
+   columns: [
+     DataColumn(label: Text('姓名')),
+     DataColumn(label: Text('年龄')),
+   ],
+   rows: [
+     DataRow(cells: [
+       DataCell(Text('ykhe')),
+       DataCell(Text('18')),
+     ]),
+     
+   ],
+ ) 
+```
+columns参数是DataTable的列，rows参数是DataTable的每一行数据.
 
 
+在添加一行数据，只需要添加一个DataRow即可:
+```
+  DataTable(
+        ...
+        rows: [
+          DataRow(cells: [
+            DataCell(Text('ykhe')),
+            DataCell(Text('18')),
+          ]),
+          DataRow(cells: [
+            DataCell(Text('大黄')),
+            DataCell(Text('20')),
+          ]),
+        ],
+      )
+```
+
+在表头显示排序图标:
+```
+  DataTable(
+    sortColumnIndex: 1,
+    sortAscending: true,
+    ...
+    )
+```
+sortColumnIndex参数表示表格显示排序图标的索引，sortAscending参数表示升序或者降序.
+
+>这里要注意DataTable本身不能对数据进行排序，这些参数仅仅是外观上的控制。
+
+
+#####  DataColumn
+
+默认情况下数据是左对齐的，让某一列右对齐只需设置DataColumn中numeric参数true:
+```
+   DataTable(
+    columns: [
+      DataColumn(label: Text('姓名')),
+      DataColumn(label: Text('年龄'),numeric: true),
+    ],
+    ...
+    )
+```
+
+设置DataColumn中**tooltip**参数表示当长安此表头时显示提示:
+``` 
+ DataColumn(label: Text('姓名'),tooltip: '长按提示')
+```
+
+onSort回调是用户点击表头（DataColumn）时的回调，onSort中第一个参数columnIndex表示索引，ascending参数表示升序或者降序:
+```
+ DataColumn(label: Text('年龄'), onSort: (int columnIndex, bool ascending){
+ 	//排序算法
+ }) 
+```
+
+#####  DataRow
+可以显示其中一行被选中，设置DataRow中selected参数为true:
+
+```
+  DataRow(
+    selected: true,
+    ...
+  )
+```
+
+onSelectChanged参数是点击每一行数据时的回调:
+```
+  DataRow(
+  	onSelectChanged: (selected){
+  	}
+  	...
+  )
+```
+设置了onSelectChanged参数，在数据的每一行和表头的前面显示勾选框.效果如下:
+
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/data_row_select.png)
+
+当然现在点击还不能显示选中的效果，增加选中效果，修改User model类，增加selected属性，表示当前行是否选中：
+
+```
+class User {
+  User(this.name, this.age, {this.selected = false});
+
+  String name;
+  int age;
+  bool selected;
+} 
+```
+
+修改数据：
+```
+  List<User> data = [
+    User('老孟', 18),
+    User('老孟1', 19,selected: true),
+    User('老孟2', 20),
+    User('老孟3', 21),
+    User('老孟4', 22),
+  ];
+```
+构建DataTable：
+```
+  List<DataRow> dateRows = [];
+      for (int i = 0; i < data.length; i++) {
+        dateRows.add(DataRow(
+          selected: data[i].selected,
+          onSelectChanged: (selected){
+            setState(() {
+              data[i].selected = selected;
+            });
+          },
+          cells: [
+            DataCell(Text('${data[i].name}')),
+            DataCell(Text('${data[i].age}')),
+          ],
+        ));
+      }
+      return DataTable(columns: [
+        DataColumn(label: Text('姓名')),
+        DataColumn(
+          label: Text('年龄'),
+        ),
+      ], rows: dateRows);
+```
+
+我们并没有对表头的全选/取消全选勾选框进行控制，一个很大的疑问：点击全选/取消全选勾选框，如果都勾选了，真实数据是否也发生变化了，对应本示例就是User中的selected参数是否全部为true，可以肯定的告诉你User中的selected参数已经全部变为true了，那是如何实现的呢？非常简单，每一行的onSelectChanged都被回调了一次。
+
+##### DataCell
+DataCell是DataRow中每一个子控件，DataCell子控件不一定是文本，也可以是图标等任意组件，我们可以给DataCell设置编辑图标:
+```
+  DataCell(Text('name'),showEditIcon: true)
+```
+
+当然仅仅是一个图标，placeholder参数也是一样的，设置为true，仅仅是文字的样式变化了，onTap为点击回调:
+```
+  DataCell(Text('name'),showEditIcon: true,onTap: (){
+    print('DataCell onTap');
+  },placeholder: true)
+```
+
+#####  排序
+DateTable本身是没有排序功能的，当用户点击表头时对数据按照本列数据进行排序:
+
+数据model类：
+```
+ class User {
+   User(this.name, this.age);
+ 
+   final String name;
+   final int age;
+ } 
+```
+初始化数据及默认排序：
+```
+  List<User> data = [
+    User('老孟', 18),
+    User('老孟1', 19),
+    User('老孟2', 20),
+    User('老孟3', 21),
+    User('老孟4', 22),
+  ];
+  
+  var _sortAscending = true;
+```
+构建DataTable：
+```
+ DataTable(
+     sortColumnIndex: 1,
+     sortAscending: _sortAscending,
+     columns: [
+       DataColumn(label: Text('姓名')),
+       DataColumn(label: Text('年龄'), onSort: (int columnIndex, bool ascending){
+         setState(() {
+           _sortAscending = ascending;
+           if(ascending){
+             data.sort((a, b) => a.age.compareTo(b.age));
+           }else {
+             data.sort((a, b) => b.age.compareTo(a.age));
+           }
+         });
+       }),
+     ],
+     rows: data.map((user) {
+       return DataRow(cells: [
+         DataCell(Text('${user.name}')),
+         DataCell(Text('${user.age}')),
+       ]);
+     }).toList()) 
+```
+
+如果想给姓名列也加上排序呢，修改如下：
+```
+  var _sortAscending = true;
+  var _sortColumnIndex =0;
+  DataTable(
+          sortColumnIndex: _sortColumnIndex,
+          sortAscending: _sortAscending,
+          columns: [
+            DataColumn(label: Text('姓名'),onSort: (int columnIndex, bool ascending){
+              setState(() {
+                _sortColumnIndex = columnIndex;
+                _sortAscending = ascending;
+                if(ascending){
+                  data.sort((a, b) => a.name.compareTo(b.name));
+                }else {
+                  data.sort((a, b) => b.name.compareTo(a.name));
+                }
+              });
+            }),
+            DataColumn(label: Text('年龄'), onSort: (int columnIndex, bool ascending){
+              setState(() {
+                _sortColumnIndex = columnIndex;
+                _sortAscending = ascending;
+                if(ascending){
+                  data.sort((a, b) => a.age.compareTo(b.age));
+                }else {
+                  data.sort((a, b) => b.age.compareTo(a.age));
+                }
+              });
+            }),
+          ],
+          ...
+  )
+```
+
+##### 处理数据不全问题
+当表格列比较多的时候，可以使用SingleChildScrollView包裹DataTable，显示不全时滚动显示:
+```
+  List<DataRow> dateRows = [];
+  for (int i = 0; i < data.length; i++) {
+    dateRows.add(DataRow(
+      cells: [
+        DataCell(Text('${data[i].name}')),
+        DataCell(Text('${data[i].age}')),
+        DataCell(Text('男')),
+        DataCell(Text('2020')),
+        DataCell(Text('10')),
+      ],
+    ));
+  }
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: DataTable(columns: [
+      DataColumn(label: Text('姓名')),
+      DataColumn(
+        label: Text('年龄'),
+      ),
+      DataColumn(
+        label: Text('性别'),
+      ),
+      DataColumn(
+        label: Text('出生年份'),
+      ),
+      DataColumn(
+        label: Text('出生月份'),
+      ),
+    ], rows: dateRows),
+  );
+```
