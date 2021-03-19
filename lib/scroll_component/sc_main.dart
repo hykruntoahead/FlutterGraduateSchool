@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app_demo/scroll_component/pageview_switch_animation.dart';
 
 import 'data_table_sort_case.dart';
 
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
               bodyText2: TextStyle(color: Colors.black, fontSize: 16),
             )),
         home:Scaffold(
-            body:  SortDataTableDemo()
+            body:  ViewPageDemo()
         )
     );
   }
