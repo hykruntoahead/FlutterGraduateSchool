@@ -3191,3 +3191,126 @@ reverse参数表示反转滚动方向，并不是有垂直转为水平，而是�
   )
 ```
 controller 和 physics 属性用法同 ListView中一样。
+
+### 7.4 PageView
+PageView 控件可以实现一个“图片轮播”的效果，PageView 不仅可以水平滑动也可以垂直滑动,
+用法如下：
+```
+ PageView(
+ 	children: <Widget>[
+ 		MyPage1(),    
+ 		MyPage2(), 
+ 		MyPage3(),    
+     ],
+ ) 
+```
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_1.png)
+
+PageView滚动方向默认是水平，可以设置其为垂直方向：
+``` 
+PageView(
+	scrollDirection: Axis.vertical,
+	...
+)
+```
+PageView配合PageController可以实现非常酷炫的效果，控制每一个Page不占满:
+```
+  PageView(
+  	controller: PageController(
+  		viewportFraction: 0.9，
+  	),
+  	...
+  )
+```
+PageController中属性initialPage表示当前加载第几页,默认第一页。
+
+onPageChanged属性是页面发生变化时的回调，用法如下：
+```
+  PageView(
+  	onPageChanged: (int index){
+  	},
+  	...
+  )
+```
+##### 无限滚动
+PageView滚动到最后时希望滚动到第一个页面，这样看起来PageView是无限滚动的：
+```
+  List<Widget> pageList = [PageView1(), PageView2(), PageView3()];
+  
+  PageView.builder(
+  	itemCount: 10000,
+  	itemBuilder: (context, index) {
+  		return pageList[index % (pageList.length)];
+      },
+  )
+```
+巧妙的利用取余重复构建页面实现PageView无限滚动的效果：
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_loop.png)
+
+##### 实现指示器
+指示器显示总数和当前位置，通过**onPageChanged**确定当前页数并更新指示器:
+```
+  List<String> pageList = ['PageView1', 'PageView2', 'PageView3'];
+    int _currentPageIndex = 0;
+  
+    _buildPageView() {
+      return Center(
+        child: Container(
+          height: 230,
+          child: Stack(
+            children: <Widget>[
+              PageView.builder(
+                onPageChanged: (int index) {
+                  setState(() {
+                    _currentPageIndex = index % (pageList.length);
+                  });
+                },
+                itemCount: 10000,
+                itemBuilder: (context, index) {
+                  return _buildPageViewItem(pageList[index % (pageList.length)]);
+                },
+              ),
+              Positioned(
+                bottom: 10,
+                left: 0,
+                right: 0,
+                child: Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(pageList.length, (i) {
+                      return Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentPageIndex == i
+                                ? Colors.blue
+                                : Colors.grey),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  
+    _buildPageViewItem(String txt, {Color color = Colors.red}) {
+      return Container(
+        color: color,
+        alignment: Alignment.center,
+        child: Text(
+          txt,
+          style: TextStyle(color: Colors.white, fontSize: 28),
+        ),
+      );
+    }
+```
+效果如下:
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/pageview_dot.png)
+
+
+
