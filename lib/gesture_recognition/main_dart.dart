@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_demo/gesture_recognition/drawing_board.dart';
 import 'package:flutter_app_demo/gesture_recognition/login_progress_button.dart';
 
+import '../scroll_component/customize_scroll_bar.dart';
+
 
 void main() {
   runApp(MyApp());
