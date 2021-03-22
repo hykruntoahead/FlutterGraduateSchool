@@ -3596,3 +3596,7 @@ DateTable本身是没有排序功能的，当用户点击表头时对数据按�
 
 ### 7.6　自定义PageView　切换动画
 [PageView切换动画](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/scroll_component/pageview_switch_animation.dart)
+
+
+### 7.7 自定义ScrollView
+[自定义ScrollView](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/scroll_component/customize_scroll_bar.dart)
