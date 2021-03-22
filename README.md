@@ -3600,3 +3600,151 @@ DateTable本身是没有排序功能的，当用户点击表头时对数据按�
 
 ### 7.7 自定义ScrollView
 [自定义ScrollView](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/scroll_component/customize_scroll_bar.dart)
+
+
+## 8.Sliver系列组件
+
+### 8.1 SliverList/SliverGrid 
+要同时滚动ListView和GridView的时候可以使用SliverList和SliverGrid
+
+
+**SliverList**
+SliverList用法很简单，只需一个构建函数：
+```
+ SliverList(
+   delegate: SliverChildBuilderDelegate((content, index) {
+     return Container(
+       height: 65,
+       color: Colors.primaries[index % Colors.primaries.length],
+     );
+   }, childCount: 5),
+ )
+ 
+```
+
+**SliverGrid**
+同样SliverGrid的用法如下：
+```
+  SliverGrid(
+    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3, crossAxisSpacing: 5, mainAxisSpacing: 3),
+    delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+      return Container(
+        color: Colors.primaries[index % Colors.primaries.length],
+      );
+    }, childCount: 20),
+  )
+```
+
+此时需要将SliverList和SliverGrid放在一起，使用**CustomScrollView**:
+
+```
+  CustomScrollView(slivers: <Widget>[
+    SliverList(
+      delegate: SliverChildBuilderDelegate((content, index) {
+        return Container(
+          height: 65,
+          color: Colors.primaries[index % Colors.primaries.length],
+        );
+      }, childCount: 5),
+    ),
+    SliverGrid(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, crossAxisSpacing: 5, mainAxisSpacing: 3),
+      delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+        return Container(
+          color: Colors.primaries[index % Colors.primaries.length],
+        );
+      }, childCount: 20),
+    )
+  ])
+```
+
+### 8.2 SliverAppBar
+SliverAppBar控件可以实现页面头部区域展开、折叠的效果，类似于Android中的**CollapsingToolbarLayout**。
+
+先看下SliverAppBar实现的效果，效果图如下：
+
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/sliver_app_bar_effect.gif)
+
+**SliverAppBar**控件需要和**CustomScrollView**搭配使用,
+SliverAppBar要通常**放在slivers的第一位**，后面接其他sliver控件。
+
+```
+  CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            
+          ),
+          //其他sliver控件
+        ],
+      )
+```
+
+SliverAppBar和其他slivers控件的结构如下：
+
+SliverAppBar中有一个非常重要的参数**flexibleSpace**，flexibleSpace是SliverAppBar中展开和折叠区域，flexibleSpace与**expandedHeight**一起使用， expandedHeight表示flexibleSpace的高度:
+
+```
+  SliverAppBar(
+            expandedHeight: 200.0,
+            flexibleSpace: FlexibleSpaceBar(
+            
+            ),
+  ),
+```
+
+SliverAppBar其他常用属性说明如下：
+
+| 属性 |	说明 |
+| --- | --- |
+| leading | 左侧控件，通常情况下为"返回"图标 |
+| title | 标题，通常为Text控件 |
+| actions | 右侧控件 |
+| flexibleSpace | 展开和折叠区域 |
+| bottom | 底部控件 |
+| elevation | 阴影 |
+| backgroundColor | 背景颜色 |
+| expandedHeight | 展开区域的高度 |
+| floating | 设置为true时，向下滑动时，即使当前CustomScrollView不在顶部，SliverAppBar也会跟着一起向下出现 |
+| pinned | 设置为true时，当SliverAppBar内容滑出屏幕时，将始终渲染一个固定在顶部的收起状态 |
+| snap | 设置为true时，当手指放开时，SliverAppBar会根据当前的位置进行调整，始终保持展开或收起的状态，此效果在floating=true时生效 |
+
+
+实现文章开头效果的整体代码如下：
+``` 
+ class SliverAppBarDemo extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return CustomScrollView(
+       slivers: <Widget>[
+         SliverAppBar(
+           pinned: true,
+           expandedHeight: 200.0,
+           flexibleSpace: FlexibleSpaceBar(
+             title: Text('复仇者联盟'),
+             background: Image.network(
+               'http://img.haote.com/upload/20180918/2018091815372344164.jpg',
+               fit: BoxFit.fitHeight,
+             ),
+           ),
+         ),
+         SliverFixedExtentList(
+           itemExtent: 80.0,
+           delegate: SliverChildBuilderDelegate(
+             (BuildContext context, int index) {
+               return Card(
+                 child: Container(
+                   alignment: Alignment.center,
+                   color: Colors.primaries[(index % 18)],
+                   child: Text(''),
+                 ),
+               );
+             },
+           ),
+         ),
+       ],
+     );
+   }
+ }
+```
