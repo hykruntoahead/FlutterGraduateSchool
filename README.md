@@ -3845,4 +3845,4 @@ shouldRebuild表示是否需要更新，如果内容需要变化需要设置为t
 ```
 ![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/sliver_to_box_adapter.png)
 
-
+黑色区域就是SliverToBoxAdapter包裹的部分。
