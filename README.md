@@ -4354,3 +4354,87 @@ result 为选择的日期。
     locale: Locale('zh')
   );
 ```
+
+### 9.2 时间选择器
+
+弹出时间组件：
+```
+ RaisedButton(
+   child: Text('弹出时间选择器'),
+   onPressed: () async {
+     var result =
+         showTimePicker(context: context, initialTime: TimeOfDay.now());
+   },
+ ) 
+```
+
+设置 **交互模式**，交互模式包含 **时钟模式（默认）** 和 **输入模式**。
+
+``` 
+var result = showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.now(),
+    initialEntryMode: TimePickerEntryMode.input);
+```
+
+设置顶部标题、取消按钮、确定按钮 文案：
+```
+  var result = showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      initialEntryMode: TimePickerEntryMode.input,
+      helpText: '选择时间',
+      cancelText: '取消',
+      confirmText: '确定');
+```
+
+设置 **24小时** 制：
+
+```
+  var result = showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.now(),
+    builder: (BuildContext context, Widget child) {
+      return MediaQuery(
+        data: MediaQuery.of(context)
+            .copyWith(alwaysUse24HourFormat: true),
+        child: child,
+      );
+    },
+  );
+```
+
+设置 **黑暗模式** ：
+```
+  var result = showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.now(),
+    builder: (BuildContext context, Widget child) {
+      return Theme(
+        data: ThemeData.dark(),
+        child: child,
+      );
+    },
+  );
+```
+
+国际化 - 参考datepicker介绍
+
+
+不跟随系统语言，直接指定，比如当前系统语言为中文，指定为英文：
+```
+  var result = showTimePicker(
+    context: context,
+    initialTime: TimeOfDay.now(),
+    builder: (BuildContext context, Widget child) {
+      return Localizations(
+        locale: Locale('en'),
+        delegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        child: child,
+      );
+    },
+  );
+```
