@@ -4438,3 +4438,147 @@ var result = showTimePicker(
     },
   );
 ```
+
+### 9.3 ios风格日期选择器
+
+ **CupertinoDatePicker** 是 iOS风格的日期选择器。
+ ```
+  class CupertinoDatePickerDemo extends StatefulWidget {
+    @override
+    _CupertinoDatePickerDemoState createState() => _CupertinoDatePickerDemoState();
+  }
+  
+  class _CupertinoDatePickerDemoState extends State<CupertinoDatePickerDemo> {
+  
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Container(
+            height: 200,
+            color: Colors.grey.withOpacity(.5),
+            child: CupertinoDatePicker(
+              initialDateTime: DateTime.now(),
+              onDateTimeChanged: (date) {
+                print('$date');
+              },
+            ),
+          ),
+        ),
+      );
+    }
+  
+  }
+ ```
+
+设置最大/小时间：(最大时间为明天，最小时间为昨天：)
+``` 
+ CupertinoDatePicker(
+   initialDateTime: DateTime.now(),
+   minimumDate: DateTime.now().add(Duration(days: -1)),
+   maximumDate: DateTime.now().add(Duration(days: 1)),
+   onDateTimeChanged: (date) {
+     print('$date');
+   },
+ )
+```
+设置模式为时间：
+```
+  CupertinoDatePicker(
+    mode: CupertinoDatePickerMode.time,
+    initialDateTime: DateTime.now(),
+    onDateTimeChanged: (date) {
+      print('$date');
+    },
+  )
+
+```
+设置模式为日期：
+```
+  CupertinoDatePicker(
+    mode: CupertinoDatePickerMode.date,
+    initialDateTime: DateTime.now(),
+    onDateTimeChanged: (date) {
+      print('$date');
+    },
+  )
+```
+
+设置模式为日期和时间：
+```
+ CupertinoDatePicker(
+   mode: CupertinoDatePickerMode.dateAndTime,
+   initialDateTime: DateTime.now(),
+   onDateTimeChanged: (date) {
+     print('$date');
+   },
+ ) 
+```
+
+- time：只显示时间，效果：4 | 14 | PM
+- date：只显示日期，效果：July | 13 | 2012
+- dateAndTime：时间和日期都显示，效果： Fri Jul 13 | 4 | 14 | PM
+
+使用24小时制：
+``` 
+ CupertinoDatePicker(
+   use24hFormat: true,
+   initialDateTime: DateTime.now(),
+   onDateTimeChanged: (date) {
+     print('$date');
+   },
+ )
+```
+##### 国际化
+在 pubspec.yaml 中引入：
+```
+  dependencies:
+    flutter_localizations:
+      sdk: flutter
+```
+
+在顶级组件 MaterialApp 添加支持:
+```
+MaterialApp(
+  title: 'Flutter Demo',
+
+  localizationsDelegates: [
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: [
+    const Locale('zh'),
+    const Locale('en'),
+  ],
+  ...
+  
+```
+组件使用:
+``` 
+CupertinoDatePicker(
+  initialDateTime: DateTime.now(),
+  onDateTimeChanged: (date) {
+    print('$date');
+  },
+)
+```
+
+不跟随系统语言，直接指定，比如当前系统语言为英文，指定为中文：
+```
+ Localizations(
+   locale: Locale('zh'),
+   delegates: [
+     GlobalMaterialLocalizations.delegate,
+     GlobalWidgetsLocalizations.delegate,
+     GlobalCupertinoLocalizations.delegate,
+   ],
+   child: CupertinoDatePicker(
+     initialDateTime: DateTime.now(),
+     onDateTimeChanged: (date) {
+       print('$date');
+     },
+   ),
+ ) 
+```
