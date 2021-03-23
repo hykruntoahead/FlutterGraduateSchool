@@ -4121,3 +4121,236 @@ NestedScrollView(
 	...
 )  
 ```
+
+
+## 9.功能型组件
+
+### 9.1 日期选择器
+
+#####  showDatePicker
+
+ 结构图:
+ ![结构图](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/date_picker_struct_photo.png)
+ 
+ 1. 标题
+ 2. 选中的日期
+ 3. 切换到输入模式
+ 4. 年选择菜单
+ 5. 月份分页
+ 6. 当前时间
+ 7. 选中日期
+ 
+ 输入模式 结构图:
+  ![输入模式](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/date_picker_input_mode.png)
+  
+  1. 标题
+  2. 选中日期
+  3. 切换　**日历模式**
+  4. 输入框
+  
+  #####  基础用法
+  
+  点击按钮弹出日期组件：
+  ```
+     RaisedButton(
+              child: Text('弹出日期组件'),
+              onPressed: () async {
+                await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2010),
+                  lastDate: DateTime(2025),
+     );
+  ```
+
+* initialDate：初始化时间，通常情况下设置为当前时间。
+* firstDate：表示开始时间，不能选择此时间前面的时间。
+* lastDate：表示结束时间，不能选择此时间之后的时间。
+
+设置日期选择器对话框的模式:
+```
+  var result = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(2010),
+    lastDate: DateTime(2025),
+    initialEntryMode: DatePickerEntryMode.input,
+  );
+
+```
+直接显示**输入模式**，默认是**日历模式**。
+
+设置日历日期选择器的初始显示，包含**day**和**year**：
+```
+  var result = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(2010),
+    lastDate: DateTime(2025),
+    initialDatePickerMode: DatePickerMode.year,
+  );
+
+```
+
+设置顶部标题、取消按钮、确定按钮 文案：
+```
+  var result = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(2010),
+    lastDate: DateTime(2025),
+    helpText: '选则日期',
+    cancelText: '取消',
+    confirmText: '确定',
+  );
+
+```
+
+修改 输入模式 下文案：
+``` 
+ var result = await showDatePicker(
+   context: context,
+   initialDate: DateTime.now(),
+   firstDate: DateTime(2010),
+   lastDate: DateTime(2025),
+   errorFormatText: '错误的日期格式',
+   errorInvalidText: '日期格式非法',
+   fieldHintText: '月/日/年',
+   fieldLabelText: '填写日期',
+ );
+```
+
+
+ 设置可选日期范围:
+ ```
+  var result = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(2010),
+    lastDate: DateTime(2025),
+    selectableDayPredicate: (date) {
+      return date.difference(DateTime.now()).inMilliseconds < 0;
+    },
+  );
+ ```
+今天以后的日期全部为灰色，不可选状态。
+
+#####  设置深色主题
+
+设置深色主题使 builder ，其用于包装对话框窗口小部件以添加继承的窗口小部件，例如Theme，设置深色主题如下：
+```
+ var result = await showDatePicker(
+   context: context,
+   initialDate: DateTime.now(),
+   firstDate: DateTime(2010),
+   lastDate: DateTime(2025),
+   builder: (context,child){
+     return Theme(
+       data: ThemeData.dark(),
+       child: child,
+     );
+   }
+ ); 
+```
+
+ 获取选中的日期:
+ 
+ showDatePicker 方法是 Future 方法，点击日期选择控件的确定按钮后，返回选择的日期。
+ ```
+  var result = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(2010),
+                lastDate: DateTime(2025),
+              );
+  
+  print('$result');
+ ```
+result 为选择的日期。
+
+
+#####  CalendarDatePicker
+**日期组件**直接显示在页面上，而不是弹出显示：
+``` 
+ CalendarDatePicker(
+   initialDate: DateTime.now(),
+   firstDate: DateTime(2010),
+   lastDate: DateTime(2025),
+   onDateChanged: (d) {
+     print('$d');
+   },
+ )
+```
+其参数和 showDatePicker 一样。
+
+#####  范围日期
+选择范围日期使用 **showDateRangePicker**：
+``` 
+ RaisedButton(
+   child: Text('范围日期'),
+   onPressed: () async {
+     var date = showDateRangePicker(context: context, firstDate: DateTime(2010), lastDate: DateTime(2025));
+   },
+ ),
+```
+其参数和 showDatePicker 一样。
+
+范围日期结构图：
+
+![范围日期结构图](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/range_date_struct.png)
+
+1. 标题
+2. 选定的日期范围
+3. 切换到输入模式
+4. 月和年标签
+5. 当前时间
+6. 开始时间
+7. 选中时间范围
+8. 结束时间
+
+##### 国际化
+国际化都是一个套路，下面以 showDatePicker 为例：
+
+在 **pubspec.yaml** 中引入：
+``` 
+ dependencies:
+   flutter_localizations:
+     sdk: flutter
+```
+在顶级组件 MaterialApp 添加支持：
+```
+  MaterialApp(
+    title: 'Flutter Demo',
+  
+    localizationsDelegates: [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: [
+      const Locale('zh'),
+      const Locale('en'),
+    ],
+    ...
+``` 
+
+弹出日期组件：(此时会将系统语音调整为中文)
+```
+ var result = await showDatePicker(
+   context: context,
+   initialDate: DateTime.now(),
+   firstDate: DateTime(2010),
+   lastDate: DateTime(2025),
+ ); 
+```
+
+此组件只支持中文，不管系统设置语言：
+```
+  var result = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now(),
+    firstDate: DateTime(2010),
+    lastDate: DateTime(2025),
+    locale: Locale('zh')
+  );
+```
