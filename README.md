@@ -3817,3 +3817,32 @@ shouldRebuild表示是否需要更新，如果内容需要变化需要设置为t
 **floating** 设置为true时，向下滑动时，即使当前CustomScrollView不在顶部，SliverAppBar也会跟着一起向下出现
 
 **pinned** 设置为true时，当SliverAppBar内容滑出屏幕时，将始终渲染一个固定在顶部的收起状态
+
+
+### 8.4 SliverToBoxAdapter
+
+在使用CustomScrollView创建自定义滚动效果的时候，CustomScrollView只能包含sliver系列组件，如果包含普通的组件就需要使用**SliverToBoxAdapter**包裹:
+
+``` 
+ CustomScrollView(
+   slivers: <Widget>[
+     SliverToBoxAdapter(
+       child: Container(
+         height: 100,
+         color: Colors.black,
+       ),
+     ),
+     SliverList(
+       delegate: SliverChildBuilderDelegate((content, index) {
+         return Container(
+           height: 65,
+           color: Colors.primaries[index % Colors.primaries.length],
+         );
+       }, childCount: 50),
+     )
+   ],
+ )
+```
+![运行图示](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/sliver_to_box_adapter.png)
+
+
