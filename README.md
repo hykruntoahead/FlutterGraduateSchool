@@ -4582,3 +4582,58 @@ CupertinoDatePicker(
    ),
  ) 
 ```
+
+### 9.4 ios风格时间选择器
+**CupertinoTimerPicker** 是 iOS风格的时间选择器。
+```
+  CupertinoTimerPicker(onTimerDurationChanged: (time) {
+    print('$time');
+  })
+```
+设置显示模式：
+
+- CupertinoTimerPickerMode.hm：显示 小时 | 分钟，英文效果16 hours | 14 min
+- CupertinoTimerPickerMode.ms： 显示 分钟 | 秒，英文效果14 min | 43 sec
+- CupertinoTimerPickerMode.hms：显示 小时 | 分钟 | 秒，英文效果16 hours | 14 min | 43 sec
+```
+ CupertinoTimerPicker(
+     mode: CupertinoTimerPickerMode.hm,
+     onTimerDurationChanged: (time) {
+       print('$time');
+     }) 
+```
+默认情况下，CupertinoTimerPicker显示0:0:0，设置显示当前时间：
+```
+ CupertinoTimerPicker(
+     initialTimerDuration: Duration(
+         hours: DateTime.now().hour,
+         minutes: DateTime.now().minute,
+         seconds: DateTime.now().second),
+     onTimerDurationChanged: (time) {
+       print('$time');
+     }) 
+```
+设置 分/秒 的间隔：
+```
+  CupertinoTimerPicker(
+      minuteInterval: 5,
+      secondInterval: 5,
+      onTimerDurationChanged: (time) {
+        print('$time');
+      })
+```
+
+不跟随系统语言，直接指定，比如当前系统语言为英文，指定为中文：
+```
+  Localizations(
+    locale: Locale('zh'),
+    delegates: [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    child: CupertinoTimerPicker(onTimerDurationChanged: (time) {
+      print('$time');
+    }),
+  )
+```
