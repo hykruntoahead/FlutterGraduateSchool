@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app_demo/functional_components/cupertino_date_picker.dart';
 import 'package:flutter_app_demo/functional_components/date_selector.dart';
+import 'package:flutter_app_demo/functional_components/popup_components.dart';
 import 'package:flutter_app_demo/functional_components/time_selector.dart';
 import 'package:flutter_app_demo/gesture_recognition/drawing_board.dart';
 import 'package:flutter_app_demo/gesture_recognition/login_progress_button.dart';
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
               bodyText2: TextStyle(color: Colors.black, fontSize: 16),
             )),
         home:Scaffold(
-            body: CupertinoDatePickerDemo()
+            body: PopupComponent()
             //TimeSelector()
             //DateSelector()
         )
