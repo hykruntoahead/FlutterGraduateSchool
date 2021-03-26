@@ -12,6 +12,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'draggable_components.dart';
 import 'dragtarget_details.dart';
+import 'inter_active_viewer_components.dart';
+import 'inter_active_viewer_components2.dart';
 
 
 
@@ -41,7 +43,9 @@ class MyApp extends StatelessWidget {
               bodyText2: TextStyle(color: Colors.black, fontSize: 16),
             )),
         home:Scaffold(
-            body: DragTargetDetailsExample()
+            body:InteractiveViewerDemo()
+            // InteractiveViewerExample()
+            // DragTargetDetailsExample()
             // StartClip()
             // ShapeDemo()
             //DialogDemo()

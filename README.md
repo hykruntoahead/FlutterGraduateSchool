@@ -5620,3 +5620,95 @@ DragTarget有3个回调，说明如下：
    );
  } 
 ```
+
+### 9.9 缩放/平移 组件
+使用**InteractiveViewer** , ，用户可以通过拖动以平移、缩放和拖放子组件.
+
+``` 
+ InteractiveViewer(
+   child: Image.asset('assets/images/go_board_09x09.png'),
+ )
+```
+**alignPanAxis** 参数表示是否只在水平和垂直方向上拖拽，默认为false，设置为true，无法沿着对角线（斜着）方向移动。
+``` 
+ InteractiveViewer(
+   alignPanAxis: true,
+   child: Image.asset('assets/images/go_board_09x09.png'),
+ )
+```
+
+maxScale 、minScale、scaleEnabled 是缩放相关参数，分别表示最大缩放倍数、最小缩放倍数、是否可以缩放：
+```
+  InteractiveViewer(
+    maxScale: 2,
+    minScale: 1,
+    scaleEnabled: true,
+    child: Image.asset('assets/images/go_board_09x09.png'),
+  )
+```
+
+**constrained** 参数表示组件树中的约束是否应用于子组件，默认为true，如果设为true，表示子组件是无限制约束，这对子组件的尺寸比 InteractiveViewer 大时非常有用，比如子组件为滚动系列组件。
+
+如下的案例，子组件为 Table，Table 尺寸大于屏幕，必须将constrained设置为 false 以便将其绘制为完整尺寸。超出的屏幕尺寸可以平移到视图中。
+
+```
+  class InteractiveViewerDemo extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      const int _rowCount = 20;
+      const int _columnCount = 10;
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Container(
+            height: 300,
+            width: 300,
+            child: InteractiveViewer(
+              constrained: false,
+              child: Table(
+                columnWidths: <int, TableColumnWidth>{
+                  for (int column = 0; column < _columnCount; column += 1)
+                    column: const FixedColumnWidth(100.0),
+                },
+                children: <TableRow>[
+                  for (int row = 0; row < _rowCount; row += 1)
+                    TableRow(
+                      children: <Widget>[
+                        for (int column = 0; column < _columnCount; column += 1)
+                          Container(
+                            height: 50,
+                            color: row % 2 + column % 2 == 1
+                                ? Colors.red
+                                : Colors.green,
+                          ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+  }
+```
+回调事件：
+- **onInteractionStart**：当用户开始平移或缩放手势时调用。
+- **onInteractionUpdat**e：当用户更新组件上的平移或缩放手势时调用。
+- **onInteractionEnd**：当用户在组件上结束平移或缩放手势时调用。
+``` 
+InteractiveViewer(
+  child: Image.asset('assets/images/go_board_09x09.png'),
+  onInteractionStart: (ScaleStartDetails scaleStartDetails){
+    print('onInteractionStart:$scaleStartDetails');
+  },
+  onInteractionUpdate: (ScaleUpdateDetails scaleUpdateDetails){
+    print('onInteractionUpdate:$scaleUpdateDetails');
+  },
+  onInteractionEnd: (ScaleEndDetails endDetails){
+    print('onInteractionEnd:$endDetails');
+  },
+)
+```
+
+通过 Matrix4 矩阵对其进行变换，比如左移、放大等，添加变换控制器：
