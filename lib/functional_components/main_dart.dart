@@ -10,6 +10,9 @@ import 'package:flutter_app_demo/gesture_recognition/drawing_board.dart';
 import 'package:flutter_app_demo/gesture_recognition/login_progress_button.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'draggable_components.dart';
+import 'dragtarget_details.dart';
+
 
 
 
@@ -38,7 +41,8 @@ class MyApp extends StatelessWidget {
               bodyText2: TextStyle(color: Colors.black, fontSize: 16),
             )),
         home:Scaffold(
-            body:StartClip()
+            body: DragTargetDetailsExample()
+            // StartClip()
             // ShapeDemo()
             //DialogDemo()
             // PopupComponent()

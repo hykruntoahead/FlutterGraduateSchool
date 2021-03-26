@@ -5424,3 +5424,199 @@ CustomClipper并不是一个组件，而是一个abstract(抽象)类，使用Cus
    }
  }
 ```
+
+### 9.8 拖拽组件
+
+拖拽组件包含 **Draggable** 、**LongPressDraggable** 和 **DragTarget**。
+
+Draggable、LongPressDraggable 为可拖拽的组件，LongPressDraggable 继承自Draggable，因此用法和 Draggable 完全一样，唯一的区别就是 LongPressDraggable 触发拖动的方式是长按，而 Draggable 触发拖动的方式是按下。
+
+DragTarget 为拖拽组件的目的地组件。
+
+##### Draggable
+
+基础用法：
+```
+ Draggable(
+   child: Container(
+     height: 100,
+     width: 100,
+     alignment: Alignment.center,
+     decoration: BoxDecoration(
+       color: Colors.red,
+       borderRadius: BorderRadius.circular(10)
+     ),
+     child: Text('孟',style: TextStyle(color: Colors.white,fontSize: 18),),
+   ),
+   feedback: Container(
+     height: 100,
+     width: 100,
+     alignment: Alignment.center,
+     decoration: BoxDecoration(
+         color: Colors.blue,
+         borderRadius: BorderRadius.circular(10)
+     ),
+     child: Text('孟',style: TextStyle(color: Colors.white,fontSize: 18),),
+   ),
+ )
+ 
+```
+
+蓝色的组件是feedback，如果想在拖动的时候子组件显示其他样式可以使用childWhenDragging参数，用法如下：
+
+```
+  childWhenDragging: Container(
+      height: 100,
+      width: 100,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+          color: Colors.grey, borderRadius: BorderRadius.circular(10)),
+      child: Text(
+        '孟',
+        style: TextStyle(color: Colors.white, fontSize: 18),
+      ),
+    ),
+```
+
+控制拖动的方向，比如只允许垂直方向移动，代码如下：
+```
+ Draggable(
+   axis: Axis.vertical,
+   ...
+ ) 
+```
+Draggable组件为我们提供了4中拖动过程中的回调事件，用法如下：
+
+```
+ Draggable(
+   onDragStarted: (){
+     print('onDragStarted');
+   },
+   onDragEnd: (DraggableDetails details){
+     print('onDragEnd:$details');
+   },
+   onDraggableCanceled: (Velocity velocity, Offset offset){
+     print('onDraggableCanceled velocity:$velocity,offset:$offset');
+   },
+   onDragCompleted: (){
+     print('onDragCompleted');
+   },
+   ...
+ )
+```
+说明如下：
+
+- onDragStarted：开始拖动时回调。
+- onDragEnd：拖动结束时回调。
+- onDraggableCanceled：未拖动到DragTarget控件上时回调。
+- onDragCompleted：拖动到DragTarget控件上时回调。
+
+Draggable有一个data参数，这个参数是和**DragTarget**配合使用的，当用户将控件拖动到DragTarget时此数据会传递给DragTarget。
+
+#####  DragTarget
+
+DragTarget就像他的名字一样，指定一个目的地，Draggable组件可以拖动到此控件，用法如下：
+``` 
+ DragTarget(
+   builder: (BuildContext context, List<dynamic> candidateData,
+       List<dynamic> rejectedData) {
+       ...
+   }
+ )
+```
+当**onWillAccept**返回true时， **candidateData**参数的数据是Draggable的data数据. 
+
+当**onWillAccept**返回false时， **rejectedData**参数的数据是Draggable的data数据.
+
+DragTarget有3个回调，说明如下：
+- onWillAccept：拖到该控件上时调用，需要返回true或者false，返回true，松手后会回调onAccept，否则回调onLeave。
+- onAccept：onWillAccept返回true时，用户松手后调用。
+- onLeave：onWillAccept返回false时，用户松手后调用。
+
+```
+ var _dragData;
+ 
+ @override
+ Widget build(BuildContext context) {
+   return Center(
+     child: Column(
+       children: <Widget>[
+         _buildDraggable(),
+         SizedBox(
+           height: 200,
+         ),
+         DragTarget<Color>(
+           builder: (BuildContext context, List<Color> candidateData,
+               List<dynamic> rejectedData) {
+             print('candidateData:$candidateData,rejectedData:$rejectedData');
+             return _dragData == null
+                 ? Container(
+                     height: 100,
+                     width: 100,
+                     alignment: Alignment.center,
+                     decoration: BoxDecoration(
+                         borderRadius: BorderRadius.circular(10),
+                         border: Border.all(color: Colors.red)),
+                   )
+                 : Container(
+                     height: 100,
+                     width: 100,
+                     alignment: Alignment.center,
+                     decoration: BoxDecoration(
+                         color: Colors.red,
+                         borderRadius: BorderRadius.circular(10)),
+                     child: Text(
+                       '孟',
+                       style: TextStyle(color: Colors.white, fontSize: 18),
+                     ),
+                   );
+           },
+           onWillAccept: (Color color) {
+             print('onWillAccept:$color');
+             return true;
+           },
+           onAccept: (Color color) {
+             setState(() {
+               _dragData = color;
+             });
+             print('onAccept:$color');
+           },
+           onLeave: (Color color) {
+             print('onLeave:$color');
+           },
+         ),
+       ],
+     ),
+   );
+ }
+ 
+ _buildDraggable() {
+   return Draggable(
+     data: Color(0x000000FF),
+     child: Container(
+       height: 100,
+       width: 100,
+       alignment: Alignment.center,
+       decoration: BoxDecoration(
+           color: Colors.red, borderRadius: BorderRadius.circular(10)),
+       child: Text(
+         '孟',
+         style: TextStyle(color: Colors.white, fontSize: 18),
+       ),
+     ),
+     feedback: Container(
+       height: 100,
+       width: 100,
+       alignment: Alignment.center,
+       decoration: BoxDecoration(
+           color: Colors.blue, borderRadius: BorderRadius.circular(10)),
+       child: DefaultTextStyle.merge(
+         style: TextStyle(color: Colors.white, fontSize: 18),
+         child: Text(
+           '孟',
+         ),
+       ),
+     ),
+   );
+ } 
+```
