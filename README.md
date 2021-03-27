@@ -6231,7 +6231,7 @@ Scaffold(
          )
 ```
 
-Drawer里面可以放置任何组件，但是一般使用ListView，分为DrawerHeader和ListTiles，用法如下：
+Drawer里面可以放置任何组件，但是一般使用**ListView**，分为**DrawerHeader**和**ListTiles**，用法如下：
 ```
  drawer: Drawer(
            child: ListView(
