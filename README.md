@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
 - theme：主题，这里可以设置全区主题，后面会具体介绍theme
 - home：首页，当前加载的Widget，例子中加载的是MyHomePage Widget
 
- MyHomePage :
+ MyHomePage :Calculator()
  ```dart
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -6531,3 +6531,5 @@ Flutter 中包含两套风格的组件，分别是 Material 和 Cupertino ，Cup
 
 
 ### 11.2 实战-计算器
+[实战-计算器](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/widget_actual_combat/caculator.dart) 
+
