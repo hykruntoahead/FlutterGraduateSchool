@@ -6528,3 +6528,6 @@ Flutter 中包含两套风格的组件，分别是 Material 和 Cupertino ，Cup
 **Flutter 使用一套代码在不同的平台上表现一致**，它不会根据不同的平台绘制不同的外形，比如使用 AlertDialog 弹出警告框，不管在 Android 上，还是在 iOS上效果是一样。
 
 但有一些功能 Flutter 区分平台，比如 ListView 滑动到底部时继续滑动，Android 底部会出现淡蓝色（默认情况下）拱形，而 iOS 上则没有，这是因为 Flutter 在封装此组件时在代码中区分了平台，所以在查看 Flutter 源码到过程中会经常看到根据不同的平台做不同处理的情况。
+
+
+### 11.2 实战-计算器
