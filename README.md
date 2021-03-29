@@ -6434,3 +6434,97 @@ RaisedButton(
   Scaffold.of(context).removeCurrentSnackBar();
   Scaffold.of(context).showSnackBar(...);
 ```
+
+### 11.1 组件总结
+
+#####  组件树
+Flutter 创建App的时候，所有的组件最后会生成一个组件树，例如如下代码：
+```
+  void main() {
+    runApp(MyApp());
+  }
+  
+  class MyApp extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      return MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+        ),
+        home: Scaffold(
+          body: Text('老孟'),
+        ),
+      );
+    }
+  }
+```
+main 函数是应用程序开始的地方，运行 MyApp 组件。生成的组件树如下：
+![WidgetTree](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/widget_tree.png)
+
+
+让 Text 组件居中，修改如下:
+```
+  Scaffold(
+    body: Center(
+      child: Text('老孟'),
+    ),
+  )
+```
+生成的组件树如下：
+![WidgetTree2](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/widget_tree_2.png)
+
+给应用程序添加 AppBar：
+```
+  Scaffold(
+    appBar: AppBar(),
+    body: Center(
+      child: Text('老孟'),
+    ),
+  )
+```
+生成的组件树如下： 
+![WidgetTree3](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/widget_tree_3.png)
+
+
+一定要记住 **组件树** 的概念，这对性能优化、事件（点击、消息等）传递、组件布局等 极其重要。
+
+##### StatefulWidget vs StatelessWidget
+Flutter 中组件分为 **无状态组件（StatelessWidget**） 和 **有状态组件（StatefulWidget）** 两种。它们唯一的区别就是运行时 重新加载 组件的方式不同，StatelessWidget 组件重新加载时重新创建当前组件的实例，而StatefulWidget组件重新加载时不会重新创建实例，而是重新执行 build 函数。
+**StatelessWidget** 组件创建的方式：
+```
+  class StatelessWidgetDemo extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      return Container();
+    }
+  }
+```
+build 函数返回当前组件，此组件一旦创建将不可改变，build 函数只能执行一次。如果想重新绘制此组件，只能重新创建此组件新的实例。
+
+**StatefulWidget** 组件创建的方式：
+```
+ class StatefulWidgetDemo extends StatefulWidget {
+   @override
+   _StatefulWidgetDemoState createState() => _StatefulWidgetDemoState();
+ }
+ 
+ class _StatefulWidgetDemoState extends State<StatefulWidgetDemo> {
+   @override
+   Widget build(BuildContext context) {
+     return Container();
+   }
+ }
+```
+StatefulWidget 组件的创建方式和 StatelessWidget 不同，State<> 中的 build 函数返回当前组件，有状态的组件可以在其生命周期内多次重绘，即多次调用 build 函数，而不是创建一个新的实例。
+
+StatefulWidget 组件重绘需要调用 setstate 方法，setstate 会使其自身及其子组件重绘，所以尽量封装 StatefulWidget 组件，避免无效的重建和重绘，影响性能。
+
+>快速书写小技巧：在 Android Studio 和 VS Code 中 输入 stl 然后点击回车，可以快速创建 StatelessWidget 组件，同理输入 stf 点击回车，可以快速创建 StatefulWidget 组件，这是编辑器 Live Templates 的功能。
+
+##### Material vs Cupertino
+
+Flutter 中包含两套风格的组件，分别是 Material 和 Cupertino ，Cupertino 是 iOS风格的组件，命名都带 Cupertino 前缀，比如 CupertinoSlider 、 CupertinoDatePicker 等， Material Design 是由 Google 推出，旨在为手机、平板电脑、台式机和“其他平台”提供更一致、更广泛的“外观和感觉”。
+
+**Flutter 使用一套代码在不同的平台上表现一致**，它不会根据不同的平台绘制不同的外形，比如使用 AlertDialog 弹出警告框，不管在 Android 上，还是在 iOS上效果是一样。
+
+但有一些功能 Flutter 区分平台，比如 ListView 滑动到底部时继续滑动，Android 底部会出现淡蓝色（默认情况下）拱形，而 iOS 上则没有，这是因为 Flutter 在封装此组件时在代码中区分了平台，所以在查看 Flutter 源码到过程中会经常看到根据不同的平台做不同处理的情况。
