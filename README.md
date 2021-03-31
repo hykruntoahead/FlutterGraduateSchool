@@ -6918,3 +6918,56 @@ class ColorTween extends Tween<Color?> {
  } 
 ```
 
+###### 动画加上**Curve** 后，AnimationController 的最小/大值必须是 [0,1]之间.
+
+系统已经提供了38种常用到动画曲线：常见的如linear,decelerate,bounceIn,bounceOut,elasticIn等.
+
+其余动画效果可以官方文档查看。
+
+通常情况下，这些曲线能够满足 99.99% 的需求，很多时候设计也就是告诉你动画 先快后慢 或者 先慢后快，所以选个类似的就可以了，但有一些 特别 的设计非要一个系统没有的动画曲线，要怎么办？
+
+#####  那就自定义一个动画曲线
+
+其实自定义一个动画曲线难点在 数学 上，怎么把数学公式用代码实现才是难点。
+
+下面是一个 **楼梯效果** 的动画曲线：
+
+![Curve_Stairs](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/curve_stairs.gif)
+
+自定义动画曲线需要继承 Curve 重写 transformInternal 方法即可：
+``` 
+class _StairsCurve extends Curve {
+
+  @override
+  double transformInternal(double t) {
+    return t;
+  }
+}
+```
+
+直接返回 t 其实就是线性动画，即 **Curves.linear**，实现楼梯效果动画代码如下：
+```
+class _StairsCurve extends Curve {
+  //阶梯的数量
+  final int num;
+  double _perStairY;
+  double _perStairX;
+
+  _StairsCurve(this.num) {
+    _perStairY = 1.0 / (num - 1);
+    _perStairX = 1.0 / num;
+  }
+
+  @override
+  double transformInternal(double t) {
+    //floor 求一个最接近它的整数，它的值小于或等于这个浮点数
+    return _perStairY * (t / _perStairX).floor();
+  }
+} 
+```
+修改开始处的案例，使用此曲线：
+``` 
+_animation = Tween(begin: 100.0, end: 200.0)
+    .chain(CurveTween(curve: _StairsCurve(5)))
+    .animate(_controller);
+```
