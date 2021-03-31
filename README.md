@@ -6533,3 +6533,178 @@ Flutter 中包含两套风格的组件，分别是 Material 和 Cupertino ，Cup
 ### 11.2 实战-计算器
 [实战-计算器](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/widget_actual_combat/caculator.dart) 
 
+
+##12.动画
+
+### 12.1　动画核心－AnimationController
+
+动画系统是任何一个UI框架的核心功能，也是开发者学习一个UI框架的重中之重，同时也是比较难掌握的一部分，下面我们就一层一层的揭开 Flutter 动画的面纱。
+
+任何程序的动画原理都是一样的，即：**视觉暂留**，视觉暂留又叫视觉暂停，人眼在观察景物时，光信号传入大脑神经，需经过一段短暂的时间，光的作用结束后，视觉形象并不立即消失，这种残留的视觉称“后像”，视觉的这一现象则被称为“视觉暂留”。
+
+人眼能保留0.1-0.4秒左右的图像，所以在 1 秒内看到连续的25张图像，人就会感到画面流畅，而 1 秒内看到连续的多少张图像称为 帧率，即 FPS，理论上 达到 **24 FPS** 画面比较流畅，而Flutter，理论上可以达到 **60 FPS**。
+
+介绍完了动画系统的基本原理，实现一个蓝色盒子大小从 100 变为 200动画效果：
+
+```
+  class AnimationBaseDemo extends StatefulWidget {
+    @override
+    _AnimationBaseDemoState createState() => _AnimationBaseDemoState();
+  }
+  
+  class _AnimationBaseDemoState extends State<AnimationBaseDemo> {
+    double _size = 100;
+  
+    @override
+    Widget build(BuildContext context) {
+      return Center(
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              _size = 200;
+            });
+          },
+          child: Container(
+            height: _size,
+            width: _size,
+            color: Colors.blue,
+            alignment: Alignment.center,
+            child: Text('点我变大',style: TextStyle(color: Colors.white,fontSize: 18),),
+          ),
+        ),
+      );
+    }
+  }
+```
+
+虽然变大了，但并没有动画效果，而是直接变大的，想要使其一点点放大需要引入 **AnimationController**，它是动画控制器，控制动画的启动、停止，还可以获取动画的运行状态，AnimationController 通常在 initState 方法中初始化：
+
+```
+  class _AnimationBaseDemoState extends State<AnimationBaseDemo> with SingleTickerProviderStateMixin{
+    double _size = 100;
+    AnimationController _controller;
+  
+    @override
+    void initState() {
+      super.initState();
+      _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 500));
+    }
+    ...
+  }
+```
+
+这里有两个参数需要设置：
+- **vsync**：当创建 AnimationController 时，需要传递一个vsync参数，存在vsync时会防止屏幕外动画消耗不必要的资源，单个 AnimationController 的时候使用 **SingleTickerProviderStateMixin**，多个 AnimationController 使用 **TickerProviderStateMixin**。
+- **duration**：表示动画执行的时间。
+
+修改如下：
+```
+  class _AnimationBaseDemoState extends State<AnimationBaseDemo> with SingleTickerProviderStateMixin{
+    double _size = 100;
+    AnimationController _controller;
+  
+    @override
+    void initState() {
+      super.initState();
+      _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 500));
+    }
+  
+    @override
+    Widget build(BuildContext context) {
+      return Center(
+        child: GestureDetector(
+          onTap: () {
+            _controller.forward();
+          },
+          child: Container(
+            height: _size,
+            width: _size,
+            color: Colors.blue,
+            alignment: Alignment.center,
+            child: Text('点我变大',style: TextStyle(color: Colors.white,fontSize: 18),),
+          ),
+        ),
+      );
+    }
+    
+    @override
+    void dispose() {
+      super.dispose();
+      _controller.dispose();
+    }
+  }
+```
+
+点击蓝色盒子的时候不再直接更改大小，而是执行动画_controller.forward()。
+
+另外在State dispose 生命周期中释放 AnimationController。
+
+此时点击蓝色盒子发现并不会变大，StatefulWidget 组件改变外观需要调用 setState，因此给 AnimationController 添加监听：
+```
+ _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 500))
+ ..addListener(() {
+   setState(() {
+     _size = 100+100*_controller.value;
+   });
+ });
+```
+每一帧都会回调addListener ，在此回调中设置蓝色盒子大小，蓝色的大小是由 100 变到 200，而 AnimationController 的值默认是 0 到 1，所以蓝色大小等于 _size = 100+100*_controller.value.
+
+
+这就是 Flutter 中最简单动画的实现方式，其中最重要的就是 AnimationController，_controller.value 是当前动画的值，默认从 0 到 1。也可以通过参数形式设置最大值和最小值：
+``` 
+ _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 500),lowerBound: 100,upperBound: 200)
+ ..addListener(() {
+   setState(() {
+     _size = _controller.value;
+   });
+ })
+```
+
+除了使用 addListener 监听每一帧，还可以监听动画状态的变化：
+```
+ _controller = AnimationController(
+     vsync: this,
+     duration: Duration(milliseconds: 500),
+     lowerBound: 100,
+     upperBound: 200)
+   ..addStatusListener((status) {
+     print('status:$status');
+   }) 
+```
+
+动画的状态分为四种：
+- dismissed：动画停止在开始处。
+- forward：动画正在从开始处运行到结束处（正向运行）。
+- reverse：动画正在从结束处运行到开始处（反向运行）。
+- completed：动画停止在结束处。
+
+再来看下动画的控制方法：
+- forward：正向执行动画。
+- reverse：反向执行动画。
+- repeat：反复执行动画。
+- reset：重置动画。
+
+forward 和 reverse 方法中都有 from 参数，这个参数的意义是一样的，表示动画从此值开始执行，而不再是从lowerBound 到 upperBound。比如上面的例子中 from 参数设置 150，那么执行动画时，蓝色盒子瞬间变为 150，然后再慢慢变大到200。
+
+让蓝色盒子大小从 100 到 200，然后再变到 100，再到 200，如此反复：
+
+```
+  _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+      lowerBound: 100,
+      upperBound: 200)
+    ..addStatusListener((AnimationStatus status) {
+      if(status == AnimationStatus.completed){
+        _controller.reverse();
+      }else if(status == AnimationStatus.dismissed){
+        _controller.forward();
+      }
+    })
+    ..addListener(() {
+      setState(() {
+        _size = _controller.value;
+      });
+    });
+```
