@@ -6708,3 +6708,213 @@ forward 和 reverse 方法中都有 from 参数，这个参数的意义是一样
       });
     });
 ```
+
+
+### 12.2 动画核心 - Tween
+
+**AnimationController** 设置的最小/大值类型是 double，如果动画的变化是颜色要如何处理？  AnimationController 在执行动画期间返回的值是 0 到 1，颜色从蓝色变为红色方法如下：
+
+```
+ _controller =
+     AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+       ..addListener(() {
+         setState(() {
+           _color = Color.lerp(_startColor, _endColor, _controller.value);
+         });
+       }); 
+```
+重点是 **Color.lerp** 方法，此方法是在两种颜色之间线性插值。
+完整代码如下：
+```
+  class TweenDemo extends StatefulWidget {
+    @override
+    _TweenDemoState createState() => _TweenDemoState();
+  }
+  
+  class _TweenDemoState extends State<TweenDemo>
+      with SingleTickerProviderStateMixin {
+    AnimationController _controller;
+  	Color _startColor = Colors.blue;
+    Color _endColor = Colors.red;
+  
+    Color _color = Colors.blue;
+  
+    @override
+    void initState() {
+      super.initState();
+      _controller =
+          AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+            ..addListener(() {
+              setState(() {
+                _color = Color.lerp(_startColor, _endColor, _controller.value);
+              });
+            });
+    }
+  
+    @override
+    Widget build(BuildContext context) {
+      return Center(
+        child: GestureDetector(
+          onTap: () {
+            _controller.forward();
+          },
+          child: Container(
+            height: 100,
+            width: 100,
+            color: _color,
+            alignment: Alignment.center,
+            child: Text(
+              '点我变色',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+          ),
+        ),
+      );
+    }
+  
+    @override
+    void dispose() {
+      super.dispose();
+      _controller.dispose();
+    }
+  }
+```
+
+Flutter 中把这种从 0 -> 1 转换为 蓝色 -> 红色 行为称之为 Tween（映射）。
+
+使用 Tween 完成动画 蓝色 -> 红色：
+```
+ class _TweenDemoState extends State<TweenDemo>
+     with SingleTickerProviderStateMixin {
+   AnimationController _controller;
+   Animation<Color> _animation;
+ 
+   @override
+   void initState() {
+     super.initState();
+     _controller =
+         AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+           ..addListener(() {
+             setState(() {});
+           });
+     _animation =
+         ColorTween(begin: Colors.blue, end: Colors.red).animate(_controller);
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Center(
+       child: GestureDetector(
+         onTap: () {
+           _controller.forward();
+         },
+         child: Container(
+           height: 100,
+           width: 100,
+           color: _animation.value,
+           alignment: Alignment.center,
+           child: Text(
+             '点我变色',
+             style: TextStyle(color: Colors.white, fontSize: 18),
+           ),
+         ),
+       ),
+     );
+   }
+ 
+   @override
+   void dispose() {
+     super.dispose();
+     _controller.dispose();
+   }
+ }
+
+```
+
+效果和上面是一样的。
+
+Tween 仅仅是映射，动画的控制依然由 AnimationController 控制，因此需要 Tween.animate(_controller) 将控制器传递给Tween。
+
+![Tween](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/tween.png)
+
+基本上常用的属性都包含了其对应的 Tween，看一下 ColorTween 的源代码实现：
+``` 
+class ColorTween extends Tween<Color?> {
+  /// Creates a [Color] tween.
+  ///
+  /// The [begin] and [end] properties may be null; the null value
+  /// is treated as transparent.
+  ///
+  /// We recommend that you do not pass [Colors.transparent] as [begin]
+  /// or [end] if you want the effect of fading in or out of transparent.
+  /// Instead prefer null. [Colors.transparent] refers to black transparent and
+  /// thus will fade out of or into black which is likely unwanted.
+  ColorTween({ Color? begin, Color? end }) : super(begin: begin, end: end);
+
+  /// Returns the value this variable has at the given animation clock value.
+  @override
+  Color? lerp(double t) => Color.lerp(begin, end, t);
+}
+```
+本质上也是使用 Color.lerp 实现的。
+
+### 12.3动画核心-Curve
+
+动画中还有一个重要的概念就是 Curve，即动画执行曲线。Curve 的作用和 Android 中的 Interpolator（差值器）是一样的，负责控制动画变化的速率，通俗地讲就是使动画的效果能够以匀速、加速、减速、抛物线等各种速率变化。
+
+蓝色盒子大小 100 变大到 200，动画曲线设置为 bounceIn（弹簧效果） ：
+
+```
+ class CurveDemo extends StatefulWidget {
+   @override
+   _CurveDemoState createState() => _CurveDemoState();
+ }
+ 
+ class _CurveDemoState extends State<CurveDemo>
+     with SingleTickerProviderStateMixin {
+   AnimationController _controller;
+   Animation _animation;
+ 
+   @override
+   void initState() {
+     super.initState();
+     _controller =
+         AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
+           ..addListener(() {
+             setState(() {});
+           });
+ 
+     _animation = Tween(begin: 100.0, end: 200.0)
+         .chain(CurveTween(curve: Curves.bounceIn))
+         .animate(_controller);
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Center(
+       child: GestureDetector(
+         onTap: () {
+           _controller.forward();
+         },
+         child: Container(
+           height: _animation.value,
+           width: _animation.value,
+           color: Colors.blue,
+           alignment: Alignment.center,
+           child: Text(
+             '点我变大',
+             style: TextStyle(color: Colors.white, fontSize: 18),
+           ),
+         ),
+       ),
+     );
+   }
+ 
+   @override
+   void dispose() {
+     super.dispose();
+     _controller.dispose();
+   }
+ } 
+```
+
