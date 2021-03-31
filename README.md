@@ -6971,3 +6971,138 @@ _animation = Tween(begin: 100.0, end: 200.0)
     .chain(CurveTween(curve: _StairsCurve(5)))
     .animate(_controller);
 ```
+
+### 12.4动画核心总结
+
+动画系统的核心是 AnimationController，而且是不可或缺的，动画中必须有 **AnimationController**，
+而 **Tween** 和 **Curve** 则是对 AnimationController 的补充， 
+- Tween 实现了将 AnimationController [0,1]的值映射为其他类型的值，比如颜色、样式等，
+- Curve 是 AnimationController 动画执行曲线，默认是线性运行。
+
+将 AnimationController 、 Tween 、Curve 进行关联的方式：
+```
+ AnimationController _controller;
+ Animation _animation;
+ 
+ @override
+ void initState() {
+   super.initState();
+   _controller =
+       AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
+         ..addListener(() {
+           setState(() {});
+         });
+ 
+   _animation = Tween(begin: 100.0, end: 200.0)
+       .animate(_controller);
+ } 
+```
+或者：
+``` 
+ _animation = _controller.drive(Tween(begin: 100.0, end: 200.0));
+```
+
+加入 Curve ：
+``` 
+　_animation = Tween(begin: 100.0, end: 200.0)
+     .chain(CurveTween(curve: Curves.linear))
+     .animate(_controller);　
+```
+或者：
+``` 
+ _animation = _controller
+     .drive(CurveTween(curve: Curves.linear))
+     .drive(Tween(begin: 100.0, end: 200.0));
+```
+
+只需要 Curve ：
+``` 
+ _animation = CurveTween(curve: Curves.linear)
+     .animate(_controller);
+```
+或者
+``` 
+_animation = _controller.drive(CurveTween(curve: Curves.linear));
+```
+一个 AnimationController 可以对应多个 Animation（Tween 或者 Curve），StatefulWidget 组件可以包含多个 AnimationController ，但 SingleTickerProviderStateMixin 需要修改为 **TickerProviderStateMixin**，改变颜色和大小，由两个 AnimationController 控制：
+
+```
+ class MultiControllerDemo extends StatefulWidget {
+   @override
+   _MultiControllerDemoState createState() => _MultiControllerDemoState();
+ }
+ 
+ class _MultiControllerDemoState extends State<MultiControllerDemo>
+     with TickerProviderStateMixin {
+   AnimationController _sizeController;
+   AnimationController _colorController;
+   Animation<double> _sizeAnimation;
+   Animation<Color> _colorAnimation;
+ 
+   @override
+   void initState() {
+     super.initState();
+     _sizeController =
+         AnimationController(vsync: this, duration: Duration(milliseconds: 2000))
+           ..addListener(() {
+             setState(() {});
+           });
+ 
+     _sizeAnimation = _sizeController
+         .drive(CurveTween(curve: Curves.linear))
+         .drive(Tween(begin: 100.0, end: 200.0));
+ 
+     _colorController =
+         AnimationController(vsync: this, duration: Duration(milliseconds: 1000))
+           ..addListener(() {
+             setState(() {});
+           });
+ 
+     _colorAnimation = _colorController
+         .drive(CurveTween(curve: Curves.bounceIn))
+         .drive(ColorTween(begin: Colors.blue, end: Colors.red));
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Center(
+       child: GestureDetector(
+         onTap: () {
+           _sizeController.forward();
+           _colorController.forward();
+         },
+         child: Container(
+           height: _sizeAnimation.value,
+           width: _sizeAnimation.value,
+           color: _colorAnimation.value,
+           alignment: Alignment.center,
+           child: Text(
+             '点我变化',
+             style: TextStyle(color: Colors.white, fontSize: 18),
+           ),
+         ),
+       ),
+     );
+   }
+ 
+   @override
+   void dispose() {
+     super.dispose();
+     _sizeController.dispose();
+     _colorController.dispose();
+   }
+ }
+```
+
+AnimationController 、Tween 、Curve 是整个动画的基础，Flutter 系统封装了大量了动画组件，但这些组件也是基于此封装的，因为深入了解这三部分比学习使用动画组件更重要，再次对这3个进行总结：
+
+- AnimationController：动画控制器，控制动画的播放、停止等。继承自Animation< double >，是一个特殊的Animation对象，默认情况下它会线性的生成一个0.0到1.0的值，类型只能是 double 类型，不设置动画曲线的情况下，可以设置输出的最小值和最大值。
+- Curve：动画曲线，作用和Android中的Interpolator（差值器）类似，负责控制动画变化的速率，通俗地讲就是使动画的效果能够以匀速、加速、减速、抛物线等各种速率变化。
+- Tween：将 AnimationController 生成的 [0,1]值映射成其他属性的值，比如颜色、样式等。
+
+完成一个动画效果的过程如下：
+![Animation_progress](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/animation_effect_process.png)
+
+1. 创建 AnimationController 。
+2. 如果需要 Tween 或者 Curve，将 AnimationController 与其关联，Tween 和 Curve 并不是必须的，当然大部分情况都需要。
+3. 将动画值作用于组件，当没有Tween 和 Curve 时，动画值来源于AnimationController，如果有 Tween 和 Curve，动画值来源于 Tween 或者Curve 的 Animation。
