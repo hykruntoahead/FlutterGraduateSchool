@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app_demo/animation/curve_demo.dart';
 import 'package:flutter_app_demo/animation/tween_demo.dart';
+import 'package:flutter_app_demo/animation/tween_sequence_demo.dart';
 
 import 'animation_controller_demo.dart';
 import 'animation_core_summary_demo.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
               bodyText2: TextStyle(color: Colors.black, fontSize: 16),
             )),
         home: Scaffold(
-          body:AnimationCoreDemo(),
+          body:AnimationDemo(),
           // CurveDemo()
           // TweenDemo(),
           // AnimationBaseDemo(),

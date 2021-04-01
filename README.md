@@ -7106,3 +7106,93 @@ AnimationController 、Tween 、Curve 是整个动画的基础，Flutter 系统�
 1. 创建 AnimationController 。
 2. 如果需要 Tween 或者 Curve，将 AnimationController 与其关联，Tween 和 Curve 并不是必须的，当然大部分情况都需要。
 3. 将动画值作用于组件，当没有Tween 和 Curve 时，动画值来源于AnimationController，如果有 Tween 和 Curve，动画值来源于 Tween 或者Curve 的 Animation。
+
+
+### 12.5 动画序列 TweenSequence
+Flutter中组合动画使用**Interval**，Interval继承自Curve，用法如下：
+```
+ Animation _sizeAnimation = Tween(begin: 100.0, end: 300.0)
+                .animate(CurvedAnimation(
+            parent: _animationController, curve: Interval(0.5, 1.0)));
+```
+
+表示_sizeAnimation动画从0.5（一半）开始到结束，如果动画时长为6秒，_sizeAnimation则从第3秒开始。
+
+Interval中begin 和end参数值的范围是0.0到1.0.
+
+下面实现一个先执行颜色变化，在执行大小变化，代码如下：
+
+```
+ class AnimationDemo extends StatefulWidget {
+   @override
+   State<StatefulWidget> createState() => _AnimationDemo();
+ }
+ 
+ class _AnimationDemo extends State<AnimationDemo>
+     with SingleTickerProviderStateMixin {
+   AnimationController _animationController;
+   Animation _colorAnimation;
+   Animation _sizeAnimation;
+ 
+   @override
+   void initState() {
+     _animationController =
+         AnimationController(duration: Duration(seconds: 5), vsync: this)
+     ..addListener((){setState(() {
+       
+     });});
+ 
+     _colorAnimation = ColorTween(begin: Colors.red, end: Colors.blue).animate(
+         CurvedAnimation(
+             parent: _animationController, curve: Interval(0.0, 0.5)));
+ 
+     _sizeAnimation = Tween(begin: 100.0, end: 300.0).animate(CurvedAnimation(
+         parent: _animationController, curve: Interval(0.5, 1.0)));
+ 
+     //开始动画
+     _animationController.forward();
+     super.initState();
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Center(
+       child: Column(
+         mainAxisSize: MainAxisSize.min,
+         children: <Widget>[
+           Container(
+               height: _sizeAnimation.value,
+               width: _sizeAnimation.value,
+               color: _colorAnimation.value),
+         ],
+       ),
+     );
+   }
+ 
+   @override
+   void dispose() {
+     _animationController.dispose();
+     super.dispose();
+   }
+ } 
+```
+
+我们也可以设置同时动画，只需将2个Interval的值都改为Interval(0.0, 1.0)。
+
+想象下面的场景，一个红色的盒子，动画时长为6秒，前40%的时间大小从100->200，然后保持200不变20%的时间，最后40%的时间大小从200->300，这种效果通过TweenSequence实现，代码如下：
+
+```
+ _animation = TweenSequence([
+   TweenSequenceItem(
+       tween: Tween(begin: 100.0, end: 200.0)
+           .chain(CurveTween(curve: Curves.easeIn)),
+       weight: 40),
+   TweenSequenceItem(tween: ConstantTween<double>(200.0), weight: 20),
+   TweenSequenceItem(tween: Tween(begin: 200.0, end: 300.0), weight: 40),
+ ]).animate(_animationController); 
+```
+weight表示每一个Tween的权重。
+
+最终效果如下：
+
+![TweenSequence](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/tween_sequence.gif)
