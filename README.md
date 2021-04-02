@@ -7543,7 +7543,7 @@ AnimatedListState是AnimatedList的状态类，获取AnimatedListState有两个�
   _listKey.currentState.insertItem(_index);
 ```
 
-需要注意的是AnimatedListState.insertItem或者AnimatedListState.removeItem并不会更新实际数据，需要手动处理。 下面的代码实现了“左进右出”的动画效果：
+需要注意的是AnimatedListState.insertItem或者AnimatedListState.removeItem并不会更新实际数据，需要手动处理。 下面的代码实现了“**左进右出**”的动画效果：
 
 ```
   class AnimatedListDemo extends StatefulWidget {
@@ -7616,7 +7616,7 @@ AnimatedListState是AnimatedList的状态类，获取AnimatedListState有两个�
   }
 ```
 
-实现从上掉落的效果，只需将_buildItem方法代码修改如下即可：
+实现**从上掉落**的效果，只需将_buildItem方法代码修改如下即可：
 ```
    Widget _buildItem(String _item, Animation _animation) {
      return SizeTransition(
