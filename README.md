@@ -7196,3 +7196,306 @@ weight表示每一个Tween的权重。
 最终效果如下：
 
 ![TweenSequence](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/tween_sequence.gif)
+
+### 12.6 一文学会２０多个动画组件
+
+Flutter 系统提供了20多个动画组件，只要你把前面 **【动画核心】** 的文章看明白了，这些组件对你来说是非常轻松的，这些组件大部分都是对常用操作的封装。
+
+回顾上一篇【动画核心】的文章中创建动画三个必须的步骤：
+
+1. 创建 AnimationController。
+2. 监听 AnimationController，调用 **setState** 刷新UI。
+3. 释放 AnimationController。
+
+看第二步，每个动画都需要这个步骤，因此对其封装，命名为 MyAnimatedWidget：
+```
+ class MyAnimatedWidget extends StatefulWidget {
+   final AnimationController controller;
+   final Widget child;
+ 
+   const MyAnimatedWidget(
+       {Key key, @required this.controller, @required  this.child})
+       : super(key: key);
+ 
+   @override
+   _MyAnimatedWidgetState createState() => _MyAnimatedWidgetState();
+ }
+ 
+ class _MyAnimatedWidgetState extends State<MyAnimatedWidget> {
+   @override
+   void initState() {
+     super.initState();
+     widget.controller.addListener(() {
+       setState(() {});
+     });
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return widget.child;
+   }
+ 	
+   @override
+   void dispose() {
+     super.dispose();
+     widget.controller.dispose();
+   }
+ } 
+```
+
+自定义的动画组件只有两个功能：
+
+- 监听 AnimationController，调用 setState 。
+- 释放 AnimationController。
+
+
+其实这个组件不用我们自己封装，因为系统已经封装好了，在学习 Flutter 的过程中自定义组件是非常重要的，因此多封装一些组件，即使是系统已经存在的，用自己和系统的进行对比，可以极大的提高我们自定义组件的能力。
+
+系统封装的类似上面的组件是 **AnimatedWidget**，此类是抽象类，源代码：
+``` 
+ abstract class AnimatedWidget extends StatefulWidget {
+   /// Creates a widget that rebuilds when the given listenable changes.
+   ///
+   /// The [listenable] argument is required.
+   const AnimatedWidget({
+     Key? key,
+     required this.listenable,
+   }) : assert(listenable != null),
+        super(key: key);
+ 
+   /// The [Listenable] to which this widget is listening.
+   ///
+   /// Commonly an [Animation] or a [ChangeNotifier].
+   final Listenable listenable;
+ 
+   /// Override this method to build widgets that depend on the state of the
+   /// listenable (e.g., the current value of the animation).
+   @protected
+   Widget build(BuildContext context);
+ 
+   /// Subclasses typically do not override this method.
+   @override
+   _AnimatedState createState() => _AnimatedState();
+ 
+   @override
+   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+     super.debugFillProperties(properties);
+     properties.add(DiagnosticsProperty<Listenable>('animation', listenable));
+   }
+ }
+ 
+ class _AnimatedState extends State<AnimatedWidget> {
+   @override
+   void initState() {
+     super.initState();
+     widget.listenable.addListener(_handleChange);
+   }
+ 
+   @override
+   void didUpdateWidget(AnimatedWidget oldWidget) {
+     super.didUpdateWidget(oldWidget);
+     if (widget.listenable != oldWidget.listenable) {
+       oldWidget.listenable.removeListener(_handleChange);
+       widget.listenable.addListener(_handleChange);
+     }
+   }
+ 
+   @override
+   void dispose() {
+     widget.listenable.removeListener(_handleChange);
+     super.dispose();
+   }
+ 
+   void _handleChange() {
+     setState(() {
+       // The listenable's state is our build state, and it changed already.
+     });
+   }
+ 
+   @override
+   Widget build(BuildContext context) => widget.build(context);
+ }
+```
+区别：
+
+1. 我们使用 监听 AnimationController，调用 setState ，而系统使用 Listenable，Listenable 是一个维护侦听器列表的对象，用于通知客户端该对象已被更新。
+
+    Listenable 有两个变体：
+        1. ValueListenable ：扩展[Listenable]接口的接口，具有当前值的概念。
+        2. Animation：一个扩展[ValueListenable]接口的接口，添加方向（正向或反向）的概念。
+        AnimationController 的继承结构：
+        ![Animation_Controller_Extends](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/animation_controller_extends.png)
+    
+        AnimationController 也是继承自 Listenable，因此使用 Listenable 适用的范围更广，不仅仅可以用于 Animation ，还可以用于 ChangeNotifier。
+
+由于使用了 Listenable，因此监听和释放使用listenable.addListener 和 listenable.removeListener。
+AnimatedWidget 是一个抽象类，不能直接使用，其子类包括：
+![Animation_Widget_Extends](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/animation_widget_extends.png)
+
+以 **ScaleTransition** 为例使用方式：
+```
+ class AnimationDemo extends StatefulWidget {
+   @override
+   State<StatefulWidget> createState() => _AnimationDemo();
+ }
+ 
+ class _AnimationDemo extends State<AnimationDemo>
+     with SingleTickerProviderStateMixin {
+   AnimationController _animationController;
+   Animation _animation;
+ 
+   @override
+   void initState() {
+     _animationController =
+         AnimationController(duration: Duration(seconds: 2), vsync: this);
+ 
+     _animation = Tween(begin: .5, end: .1).animate(_animationController);
+ 
+     //开始动画
+     _animationController.forward();
+     super.initState();
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return ScaleTransition(
+       scale: _animation,
+       child: Container(
+         height: 200,
+         width: 200,
+         color: Colors.red,
+       ),
+     );
+   }
+ 
+   @override
+   void dispose() {
+     _animationController.dispose();
+     super.dispose();
+   }
+ }
+```
+
+和【动画核心】中写法唯一的不同是不需要主动调用 setState。
+
+AnimatedWidget 其他子类的用法类似，不在一一介绍，其他组件的详细用法可到 
+[widgets_structure]http://laomengit.com/flutter/widgets/widgets_structure.html 中查看。
+
+AnimatedWidget 只是封装了 setState，系统是否有封装 AnimationController、Tween、Curve且自动管理AnimationController的组件呢？有的，此组件就是 **ImplicitlyAnimatedWidget**，ImplicitlyAnimatedWidget 也是一个抽象类，其子类包括：
+
+![ImplicitlyAnimatedWidget](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/implicitly_animated_widget.png)
+
+以 **AnimatedOpacity** 为例使用方式：
+``` 
+class AnimatedWidgetDemo extends StatefulWidget {
+  @override
+  _AnimatedWidgetDemoState createState() => _AnimatedWidgetDemoState();
+}
+
+class _AnimatedWidgetDemoState extends State<AnimatedWidgetDemo> {
+  double _opacity = 1.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AnimatedOpacity(
+        opacity: _opacity,
+        duration: Duration(seconds: 2),
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              _opacity = 0;
+            });
+          },
+          child: Container(
+            height: 60,
+            width: 150,
+            color: Colors.blue,
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+使用 AnimatedOpacity 我们并没有主动创建 AnimationController 和 Tween，是因为 AnimatedOpacity 内部已经创建了。
+
+所以别看 Flutter 内置了20多种动画组件，90% 都是对上面两种方式的封装，分别称为隐式动画组件 和 显示动画组件：
+- **隐式动画组件:** 只需提供给组件动画开始、结束值，组件创建 AnimationController、Curve、Tween，执行动画，释放AnimationController，我们称之为隐式动画组件，隐式动画组件有： AnimatedAlign、AnimatedContainer、AnimatedDefaultTextStyle、AnimatedOpacity、AnimatedPadding、AnimatedPhysicalModel、AnimatedPositioned、AnimatedPositionedDirectional、AnimatedTheme、SliverAnimatedOpacity、TweenAnimationBuilder、AnimatedContainer 等。
+
+- **显示动画组件:** 需要设置 AnimationController，控制动画的执行，使用显式动画可以完成任何隐式动画的效果，甚至功能更丰富一些，不过你需要管理该动画的 AnimationController 生命周期，AnimationController 并不是一个控件，所以需要将其放在 stateful 控件中。显示动画组件有：AlignTransition、AnimatedBuilder、AnimatedModalBarrier、DecoratedBoxTransition、DefaultTextStyleTransition、PositionedTransition、RelativePositionedTransition、RotationTransition、ScaleTransition、SizeTransition、SlideTransition 、FadeTransition 等。
+
+不难看出，使用隐式动画控件，代码更简单，而且无需管理 AnimationController 的生命周期，有人觉得隐式动画组件多方便啊，为什么还要显示动画组件呢？因为：**封装的越复杂，使用越简单，往往伴随着功能越不丰富。** 比如想让动画一直重复执行，隐式动画组件是无法实现的。
+
+显示动画组件和隐式动画组件中各有一个万能的组件，它们是 AnimatedBuilder 和 TweenAnimationBuilder，当系统中不存在我们想要的动画组件时，可以使用这两个组件，以 AnimatedBuilder 为例，实现 Container 大小和颜色同时动画，
+
+```
+  class AnimatedBuilderDemo extends StatefulWidget {
+    @override
+    _AnimatedBuilderDemoState createState() => _AnimatedBuilderDemoState();
+  }
+  
+  class _AnimatedBuilderDemoState extends State<AnimatedBuilderDemo>
+      with SingleTickerProviderStateMixin {
+    AnimationController _controller;
+    Animation<Color> _colorAnimation;
+    Animation<Size> _sizeAnimation;
+  
+    @override
+    void initState() {
+      _controller =
+          AnimationController(vsync: this, duration: Duration(seconds: 2));
+  
+      _colorAnimation =
+          ColorTween(begin: Colors.blue, end: Colors.red).animate(_controller);
+      _sizeAnimation =
+          SizeTween(begin: Size(100.0, 50.0), end: Size(200.0, 100.0))
+              .animate(_controller);
+  
+      _controller.forward();
+      super.initState();
+    }
+  
+    @override
+    void dispose() {
+      _controller.dispose();
+      super.dispose();
+    }
+  
+    @override
+    Widget build(BuildContext context) {
+      return Center(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, widget) {
+            return Container(
+              width: _sizeAnimation.value.width,
+              height: _sizeAnimation.value.height,
+              color: _colorAnimation.value,
+            );
+          },
+        ),
+      );
+    }
+  }
+```
+**AnimatedBuilder** 和 **TweenAnimationBuilder** 本质上和其他动画组件没有区别，只是给了我们更高的灵活性。
+
+#####  总结
+Flutter 内置的动画组件分为两种：隐式动画组件 和 显示动画组件 ，显示动画组件只封装了 setState 方法，需要开发者创建 AnimationController，并管理 AnimationController。隐式动画组件封装了 AnimationController、Curve、Tween，只需提供给组件动画开始、结束值，其余由系统管理.
+
+隐式动画组件可以完成效果，显示动画组件都可以完成，那么什么时候使用隐式动画组件？什么时候使用显示动画组件？
+
+1. 判断你的动画组件是否一直重复，比如一直转圈的loading动画，如果是选择显式动画。
+2. 判断你的动画组件是否需要多个组件联动，如果是选择显式动画。
+3. 判断你的动画组件是否需要组合动画，如果是选择显式动画。
+4. 如果上面三个条件都是否，就选择隐式动画组件，判断是否已经内置动画组件，如果没有，使用 TweenAnimationBuilder，有就直接使用内置动画组件。
+5. 选择显式动画组件，判断是否已经内置动画组件，如果没有，使用 AnimatedBuilder，有就直接使用内置动画组件。
+
+逻辑图如下：
+![ImplicitlyAnimatedWidget](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/animation_widgets_logic_img.png)
+
+还有一个简单的区分办法：如果你的动画相对比较简单，动画从一种状态过渡到另一种状态，不需要单独控制 AnimationController，这种情况下，隐式动画组件一般可以就可以实现。
+
+不过也没有必要特别纠结使用隐式动画组件还是显示动画组件，不管使用哪一种，实现效果即可。
