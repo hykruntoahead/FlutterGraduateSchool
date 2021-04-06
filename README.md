@@ -7707,3 +7707,303 @@ class _Hero1Demo extends StatelessWidget {
 ```
 2个页面都有Hero控件，且tag参数一致。
 
+
+### 12.9 Material motion 
+
+在 Flutter 1.17 发布大会上，Flutter 团队还发布了新的 Animations 软件包，该软件包提供了实现新的 Material motion 规范的预构建动画。
+
+[Material motion 规范]https://material.io/design/motion/the-motion-system.html
+
+ 引入插件，版本号请到 pub 上查看最新版本号：
+ ```
+  animations: ^1.1.1
+ ```
+
+##### Container transform
+
+容器转换模式设计用于包含容器的UI元素之间的转换。此模式在两个UI元素之间创建可见连接。
+
+案例：构建GridView，点击其中一项时跳转到期详情页面：
+```
+ GridView.builder(
+   padding: EdgeInsets.all(8),
+   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+       crossAxisCount: 2, crossAxisSpacing: 2, mainAxisSpacing: 4),
+   itemBuilder: (context, index) {
+     return OpenContainer(
+       transitionDuration: _duration,
+       closedBuilder: (BuildContext _, VoidCallback openContainer) {
+         return Container(
+           child: Image.asset(
+             'assets/images/b.jpg',
+             fit: BoxFit.fitWidth,
+           ),
+         );
+       },
+       openBuilder: (BuildContext context, VoidCallback _) {
+         return _DetailPage();
+       },
+     );
+   },
+   itemCount: 50,
+ ) 
+```
+使用 **OpenContainer** 组件，closedBuilder 表示关闭状态时到组件，在这里表示 GridView Item，openBuilder 表示点击要跳转的页面，这里表示详情页面。
+
+详情页面代码如下：
+```
+ class _DetailPage extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(),
+       body: Container(
+         width: double.infinity,
+         height: double.infinity,
+         child: Image.asset(
+           'assets/images/b.jpg',
+           fit: BoxFit.cover,
+         ),
+       ),
+     );
+   }
+ }
+```
+
+
+构建ListView
+```
+ListView.builder(
+  itemBuilder: (context, index) {
+    return OpenContainer(
+      transitionDuration: _duration,
+      closedBuilder: (BuildContext _, VoidCallback openContainer) {
+        return Card(
+          child: Container(
+            height: 45,
+            alignment: Alignment.center,
+            child: Text('$index'),
+          ),
+        );
+      },
+      openBuilder: (BuildContext context, VoidCallback _) {
+        return _DetailPage();
+      },
+    );
+  },
+  itemCount: 50,
+)  
+```
+也可以是一个按钮，比如 floatingActionButton
+
+```
+Scaffold(
+   body: _buildListView(),
+   floatingActionButton: OpenContainer(
+     openBuilder: (BuildContext context, VoidCallback _) {
+       return _DetailPage();
+     },
+     transitionDuration: _duration,
+     closedElevation: 6.0,
+     closedShape: const RoundedRectangleBorder(
+       borderRadius: BorderRadius.all(
+         Radius.circular(50),
+       ),
+     ),
+     closedColor: Theme.of(context).colorScheme.secondary,
+     closedBuilder: (BuildContext context, VoidCallback openContainer) {
+       return SizedBox(
+         height: 50,
+         width: 50,
+         child: Center(
+           child: Icon(
+             Icons.add,
+             color: Theme.of(context).colorScheme.onSecondary,
+           ),
+         ),
+       );
+     },
+   ),
+ ) 
+```
+
+顶部输入框
+```
+  Scaffold(
+    appBar: AppBar(
+      title: OpenContainer(
+        transitionDuration: _duration,
+        closedBuilder: (BuildContext _, VoidCallback openContainer) {
+          return Container(
+            width: 300,
+            height: 45,
+            padding: EdgeInsets.only(left: 5),
+            decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.withOpacity(.5))),
+            alignment: Alignment.centerLeft,
+            child: Icon(Icons.search,color: Colors.black,),
+          );
+        },
+        openBuilder: (BuildContext context, VoidCallback _) {
+          return _DetailPage();
+        },
+      ),
+    ),
+  )
+
+```
+
+#####  Shared axis
+
+**共享轴模式用于具有空间或导航关系的UI元素之间的过渡**。此模式在x，y或z轴上使用共享的变换来加强元素之间的关系。
+
+底部导航案例：
+```
+ @override
+ Widget build(BuildContext context) {
+   Widget _child = _OnePage();
+   switch (_currentIndex) {
+     case 1:
+       _child = _TwoPage();
+       break;
+   }
+   return Scaffold(
+     body: PageTransitionSwitcher(
+       duration: const Duration(milliseconds: 1500),
+       reverse: false,
+       transitionBuilder: (
+         Widget child,
+         Animation<double> animation,
+         Animation<double> secondaryAnimation,
+       ) {
+         return SharedAxisTransition(
+           child: child,
+           animation: animation,
+           transitionType: SharedAxisTransitionType.horizontal,
+           secondaryAnimation: secondaryAnimation,
+         );
+       },
+       child: _child,
+     ),
+     bottomNavigationBar: BottomNavigationBar(
+       onTap: (int index) {
+         setState(() {
+           _currentIndex = index;
+         });
+       },
+       currentIndex: _currentIndex,
+       items: <BottomNavigationBarItem>[
+         BottomNavigationBarItem(title: Text('首页'), icon: Icon(Icons.home)),
+         BottomNavigationBarItem(
+             title: Text('我的'), icon: Icon(Icons.perm_identity)),
+       ],
+     ),
+   );
+ } 
+``` 
+
+类型为 y 轴：
+``` 
+ transitionType: SharedAxisTransitionType.vertical,
+```
+
+类型为 z 轴：
+```
+ transitionType: SharedAxisTransitionType.scaled,
+```
+
+##### Fade through
+
+淡入模式用于彼此之间没有密切关系的UI元素之间的过渡。
+``` 
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: const Text('Fade through')),
+    body: PageTransitionSwitcher(
+      transitionBuilder: (
+          Widget child,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          ) {
+        return FadeThroughTransition(
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          child: child,
+        );
+      },
+      child: pageList[pageIndex],
+    ),
+    bottomNavigationBar: BottomNavigationBar(
+      currentIndex: pageIndex,
+      onTap: (int newValue) {
+        setState(() {
+          pageIndex = newValue;
+        });
+      },
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.photo_library),
+          title: Text('Albums'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.photo),
+          title: Text('Photos'),
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.search),
+          title: Text('Search'),
+        ),
+      ],
+    ),
+  );
+}
+```
+
+**效果适用于：**
+- 底部导航切换。
+- 刷新列表。
+- 切换器。
+
+#####  Fade
+淡入淡出模式用于在屏幕范围内进入或退出的UI元素，例如在屏幕中央淡入淡出的对话框。
+``` 
+Scaffold(
+  body: Center(
+    child: RaisedButton(
+      onPressed: () {
+        showModal<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: const Text('对话框'),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('取消'),
+                ),
+                FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('确定'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      color: Theme.of(context).colorScheme.primary,
+      textColor: Theme.of(context).colorScheme.onPrimary,
+      child: const Text('弹出对话框'),
+    ),
+  ),
+)
+```
+适用场景：
+- dialog
+- menu
+- snackbar
+- FloatingActionButton

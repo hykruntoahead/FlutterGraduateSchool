@@ -8,6 +8,9 @@ import 'animation_20_widgets.dart';
 import 'animation_controller_demo.dart';
 import 'animation_core_summary_demo.dart';
 import 'animation_list_demo.dart';
+import 'fade_scale_transition.dart';
+import 'fade_through_transition.dart';
+import 'material_motion_shared_axis_demo.dart';
 
 
 void main() {
@@ -25,7 +28,11 @@ class MyApp extends StatelessWidget {
               bodyText2: TextStyle(color: Colors.black, fontSize: 16),
             )),
         home: Scaffold(
-          body: HeroDemo()
+          body:FadeScaleTransitionDemo(),
+          //FadeThroughTransitionDemo(),
+          //ShareAxisDemo(),
+          //MaterialMotionDemo(),
+          //HeroDemo()
           //AnimatedListDemo(),
           //AnimatedBuilderDemo()
           //AnimatedWidgetDemo(),
