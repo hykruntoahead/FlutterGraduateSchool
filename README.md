@@ -8191,3 +8191,298 @@ Navigator.push(context, CustomPageRoute(this, _TwoPage()));
 ```
 
 [案例-路由动画](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/animation/route_animation_demo.dart)
+
+### 12.11 Flutter “孔雀开屏”的动画效果
+
+类似“孔雀开屏”的动画效果，打开新的页面时，新的页面从屏幕右上角以圆形逐渐打开到全屏.
+
+在使用Navigator进入一个新的页面时，通常用法如下：
+```
+ Navigator.of(context).push(MaterialPageRoute(
+   builder: (context){
+     return PageB();
+   }
+ )); 
+```
+MaterialPageRoute就包含了切换页面时的动画效果，在iOS上效果是左右滑动切换，在Android上效果是上下滑动，如果想要自定义切换效果如何实现呢？答案是使用PageRouteBuilder，用法如下：
+
+```
+ Navigator.of(context).push(PageRouteBuilder(pageBuilder:
+     (BuildContext context, Animation<double> animation,
+         Animation<double> secondaryAnimation) {
+   ...
+ })); 
+```
+在pageBuilder函数中使用animation返回新页面的动画效果即可。
+
+新的页面以**圆形效果逐渐打开**，注意并没有缩放效果，所以新的页面是被**裁减**的，新的页面以右上角为圆心，半径逐渐变大进行裁切，就是我们想要的效果。
+
+通过上面的分析，使用**ClipPath**对新的页面进行裁切:
+```
+ Navigator.of(context).push(PageRouteBuilder(pageBuilder:
+     (BuildContext context, Animation<double> animation,
+         Animation<double> secondaryAnimation) {
+   return AnimatedBuilder(
+     animation: animation,
+     builder: (context, child) {
+       return ClipPath(
+         clipper: CirclePath(animation.value),
+         child: child,
+       );
+     },
+     child: PageB(),
+   );
+ })); 
+```
+重点是CirclePath，这就是裁切的路径，
+```
+ class CirclePath extends CustomClipper<Path> {
+   CirclePath(this.value);
+ 
+   final double value;
+ 
+   @override
+   Path getClip(Size size) {
+     var path = Path();
+     double radius =
+         value * sqrt(size.height * size.height + size.width * size.width);
+     path.addOval(Rect.fromLTRB(
+         size.width - radius, -radius, size.width + radius, radius));
+     return path;
+   }
+ 
+   @override
+   bool shouldReclip(CustomClipper<Path> oldClipper) {
+     return true;
+   }
+ } 
+```
+由于Path没有直接添加圆形的API函数，因此使用椭圆方法，只需将椭圆的矩形区域设置为正方形，那么裁切出来的就是圆形。
+
+半径的最大值并不是屏幕的宽或者高，而是屏幕的对角线长度。
+
+由于是从右上角开始，而且裁切的矩形区域必须是正方形，所以裁切的矩形区域是超出页面区域的。
+
+如果很多页面都用到了这个效果，可以进行封装，类似于MaterialPageRoute，封装如下：
+
+```
+class CirclePageRoute extends PageRoute {
+  CirclePageRoute({
+    @required this.builder,
+    this.transitionDuration = const Duration(milliseconds: 500),
+    this.opaque = true,
+    this.barrierDismissible = false,
+    this.barrierColor,
+    this.barrierLabel,
+    this.maintainState = true,
+  });
+
+  final WidgetBuilder builder;
+
+  @override
+  final Duration transitionDuration;
+
+  @override
+  final bool opaque;
+
+  @override
+  final bool barrierDismissible;
+
+  @override
+  final Color barrierColor;
+
+  @override
+  final String barrierLabel;
+
+  @override
+  final bool maintainState;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return ClipPath(
+          clipper: CirclePath(animation.value),
+          child: child,
+        );
+      },
+      child: builder(context),
+    );
+  }
+} 
+```
+使用:
+```
+Navigator.of(context).push(CirclePageRoute(builder: (context) {
+  return PageB();
+}));
+```
+
+### 12.12  渐变进度圆环
+
+自定义动画分为两种：**组合动画** 和 **自绘动画**
+
+- 组合动画就是多个组件或者多个动画控制器组成一个新的动画，就是将基础动画组件进行拼接的过程。
+- 自绘动画就是使用 Canvas 进行绘制，并与动画控制器进行联动。
+
+下面一步一步绘制渐变进度圆环，先根据进度绘制一个静态的圆环:
+```
+class _CircleProgressPainter extends CustomPainter {
+  final double progress;
+
+  _CircleProgressPainter(this.progress);
+
+  Paint _paint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 10
+    ..color = Colors.blue;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    double radius = min(size.width, size.height) / 2;
+    canvas.drawArc(Rect.fromLTWH(0, 0, radius * 2, radius * 2), -pi / 2,
+        pi * 2 * progress, false, _paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+}  
+```
+使用：
+```
+ Container(
+   height: 150,
+   width: 150,
+   child: CustomPaint(
+     painter: _CircleProgressPainter(.3),
+     child: Center(child: Text('30%')),
+   ),
+ )
+```
+
+将蓝色修改为渐变色，_CircleProgressPainter修改如下：
+```
+ @override
+ void paint(Canvas canvas, Size size) {
+   double radius = min(size.width, size.height) / 2;
+ 
+   Gradient gradient = SweepGradient(
+     endAngle: pi * 2 * progress,
+     colors: [
+       Color(0xFFD32D2F),
+       Color(0xFFEA4886),
+     ],
+   );
+   var rect = Rect.fromLTWH(0, 0, radius * 2, radius * 2);
+ 
+   _paint.shader = gradient.createShader(rect);
+ 
+   canvas.drawArc(Rect.fromLTWH(0, 0, radius * 2, radius * 2), -pi / 2,
+       pi * 2 * progress, false, _paint);
+ }
+```
+
+发现渐变色是从水平方向开始的，而圆形进度是从垂直方向顶部开始，修改渐变色从垂直方向顶部开始：
+``` 
+Gradient gradient = SweepGradient(
+  startAngle: -pi / 2,
+  endAngle: pi * 2 * progress,
+  colors: [
+    Color(0xFFD32D2F),
+    Color(0xFFEA4886),
+  ],
+);
+```
+渐变色设置 startAngle 参数，但却无效，效果没有发生变化，不知道是否是用法不对？因此只能换一个思路实现，旋转 canvas:
+
+``` 
+@override
+void paint(Canvas canvas, Size size) {
+  double radius = min(size.width, size.height) / 2;
+
+  Gradient gradient = SweepGradient(
+    startAngle: -pi / 2,
+    endAngle: pi * 2 * progress,
+    colors: [
+      Color(0xFFD32D2F),
+      Color(0xFFEA4886),
+    ],
+  );
+  var rect = Rect.fromLTWH(0, 0, radius * 2, radius * 2);
+
+  _paint.shader = gradient.createShader(rect);
+
+  canvas.save();
+  canvas.rotate(-pi / 2);
+
+  canvas.drawArc(Rect.fromLTWH(0, 0, radius * 2, radius * 2), -pi / 2,
+      pi * 2 * progress, false, _paint);
+
+  canvas.restore();
+}
+```
+
+画布的旋转是以左上角为原点，所以先向下平移，再旋转：
+```
+ @override
+   void paint(Canvas canvas, Size size) {
+     double radius = min(size.width, size.height) / 2;
+ 
+     Gradient gradient = SweepGradient(
+       startAngle: -pi / 2,
+       endAngle: pi * 2 * progress,
+       colors: [
+         Color(0xFFD32D2F),
+         Color(0xFFEA4886),
+       ],
+     );
+     var rect = Rect.fromLTWH(0, 0, radius * 2, radius * 2);
+ 
+     _paint.shader = gradient.createShader(rect);
+ 
+     canvas.save();
+     canvas.translate(0.0, size.height);
+     canvas.rotate(-pi / 2);
+ 
+     canvas.drawArc(rect, 0, pi * 2 * progress, false, _paint);
+ 
+     canvas.restore();
+   } 
+```
+
+静态圆环绘制完成了，只需给其加上动画控制器，改变进度即可：
+```
+ @override
+ Widget build(BuildContext context) {
+   return Scaffold(
+     body: Center(
+       child: Container(
+         width: 150,
+         height: 150,
+         child: TweenAnimationBuilder(
+           tween: Tween(begin: 0.0, end: 1.0),
+           duration: Duration(seconds: 3),
+           builder: (BuildContext context, double value, Widget child) {
+             return CustomPaint(
+               painter: _CircleProgressPainter(value),
+               child: Center(child: Text('${(value * 100).floor()}%')),
+             );
+           },
+         ),
+       ),
+     ),
+   );
+ } 
+```
+进度圆环的两端是矩形，修改为圆形：
+```
+ Paint _paint = Paint()
+   ..style = PaintingStyle.stroke
+   ..strokeWidth = 10
+   ..strokeCap = StrokeCap.round;
+```
+
