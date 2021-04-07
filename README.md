@@ -8189,3 +8189,5 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 ```
 Navigator.push(context, CustomPageRoute(this, _TwoPage()));  
 ```
+
+[案例-路由动画](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/lib/animation/route_animation_demo.dart)
