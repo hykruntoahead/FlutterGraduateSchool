@@ -8007,3 +8007,185 @@ Scaffold(
 - menu
 - snackbar
 - FloatingActionButton
+
+
+### 12.10 案例-路由动画
+
+**转场** 就是从当前页面跳转到另一个页面，跳转页面在 Flutter 中通过 Navigator，跳转到新页面如下：
+
+```
+ Navigator.push(context, MaterialPageRoute(builder: (context) {
+   return _TwoPage();
+ })); 
+```
+回退到前一个页面：
+```
+ Navigator.pop(context); 
+```
+Flutter 提供了两个转场动画，分别为 **MaterialPageRoute** 和 **CupertinoPageRoute**，
+MaterialPageRoute 根据不同的平台显示不同的效果，Android效果为从下到上，iOS效果为从左到右。CupertinoPageRoute 不分平台，都是从左到右。
+
+使用 MaterialPageRoute 案例如下：
+```
+ class NavigationAnimation extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(),
+       body: Center(
+         child: OutlineButton(
+           child: Text('跳转'),
+           onPressed: () {
+             Navigator.push(context, CupertinoPageRoute(builder: (context) {
+               return _TwoPage();
+             }));
+           },
+         ),
+       ),
+     );
+   }
+ }
+ 
+ class _TwoPage extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(),
+       body: Container(
+         color: Colors.blue,
+       ),
+     );
+   }
+ } 
+```
+
+如果要自定义转场动画如何做？
+
+**自定义任何组件都是一样的，如果系统有类似的，直接看源代码是如何实现的，然后按照它的模版自定义组件。**
+
+看 MaterialPageRoute 的继承关系：
+
+ ![MaterialPageRoute　继承关系](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/material_page_route_extends_relation.png)
+ 
+ PageRoute 的继承关系：
+
+![PageRoute　继承关系](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/page_route_extends_relation.png)
+
+MaterialPageRoute 和 CupertinoPageRoute 都是继承PageRoute，所以重点是 PageRoute，
+
+PageRoute 是一个抽象类，其子类还有一个 PageRouteBuilder，看其名字就知道这是一个可以自定义动画效果，PageRouteBuilder源代码：
+![PageRouteBuilder源代码](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/page_route_builder.png)
+
+pageBuilder 表示跳转的页面。
+
+transitionsBuilder 表示页面的动画效果，默认值代码：
+
+```
+Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  return child;
+} 
+```
+
+通过源代码发现，默认情况下没有动画效果。
+
+自定义转场动画只需修改**transitionsBuilder**即可：
+```
+ Navigator.push(
+     context,
+     PageRouteBuilder(pageBuilder: (
+       BuildContext context,
+       Animation<double> animation,
+       Animation<double> secondaryAnimation,
+     ) {
+       return _TwoPage();
+     }, transitionsBuilder: (BuildContext context,
+         Animation<double> animation,
+         Animation<double> secondaryAnimation,
+         Widget child) {
+       return SlideTransition(
+         position: Tween(begin: Offset(-1, 0), end: Offset(0, 0))
+             .animate(animation),
+         child: child,
+       );
+     }));
+```
+将其封装，方便使用：
+```
+  class LeftToRightPageRoute extends PageRouteBuilder {
+    final Widget newPage;
+  
+    LeftToRightPageRoute(this.newPage)
+        : super(
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) =>
+                newPage,
+            transitionsBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+              Widget child,
+            ) =>
+                SlideTransition(
+              position: Tween(begin: Offset(-1, 0), end: Offset(0, 0))
+                  .animate(animation),
+              child: child,
+            ),
+          );
+  }
+```
+使用:
+```
+ Navigator.push(context, LeftToRightPageRoute(_TwoPage())); 
+```
+
+不仅是这些平移动画，前面所学的旋转、缩放等动画直接替换 SlideTransition 即可。
+
+上面的动画只对新的页面进行了动画，如果想实现当前页面被新页面从顶部顶出的效果，实现方式如下：
+```
+ class CustomPageRoute extends PageRouteBuilder {
+   final Widget currentPage;
+   final Widget newPage;
+ 
+   CustomPageRoute(this.currentPage, this.newPage)
+       : super(
+           pageBuilder: (
+             BuildContext context,
+             Animation<double> animation,
+             Animation<double> secondaryAnimation,
+           ) =>
+               currentPage,
+           transitionsBuilder: (
+             BuildContext context,
+             Animation<double> animation,
+             Animation<double> secondaryAnimation,
+             Widget child,
+           ) =>
+               Stack(
+             children: <Widget>[
+               SlideTransition(
+                 position: new Tween<Offset>(
+                   begin: const Offset(0, 0),
+                   end: const Offset(0, -1),
+                 ).animate(animation),
+                 child: currentPage,
+               ),
+               SlideTransition(
+                 position: new Tween<Offset>(
+                   begin: const Offset(0, 1),
+                   end: Offset(0, 0),
+                 ).animate(animation),
+                 child: newPage,
+               )
+             ],
+           ),
+         );
+ }
+```
+
+本质就是对两个页面做动画处理，使用：
+```
+Navigator.push(context, CustomPageRoute(this, _TwoPage()));  
+```
