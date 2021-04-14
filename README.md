@@ -8954,7 +8954,7 @@ push 相关方法返回 Future 类型，使用 await 等待返回结果。
   flutter: A-didPopNext route: /ARouteObserver
   flutter: B-didPop route: /BRouteObserver
 ```
-先调用了 ARouteObserverDemo 页面的 didPopNext，然后调用了 BRouteObserverDemo 页面的 didPop。
+先调用了 ARouteObserverDemo 页面的 **didPopNext**，然后调用了 BRouteObserverDemo 页面的 **didPop**。
 
 上面的案例仅仅是页面级别的路由堆栈变化，如果想知道整个应用程序路由堆栈变化如何处理？
 
