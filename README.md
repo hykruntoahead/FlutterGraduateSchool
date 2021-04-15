@@ -9026,3 +9026,58 @@ push 相关方法返回 Future 类型，使用 await 等待返回结果。
  flutter: didPush route: MaterialPageRoute<dynamic>(RouteSettings("/B", 来自A), animation: AnimationController#6d429(▶ 0.000; for MaterialPageRoute<dynamic>(/B))),previousRoute:MaterialPageRoute<dynamic>(RouteSettings("/A", null), animation: AnimationController#e60f7(⏭ 1.000; paused; for MaterialPageRoute<dynamic>(/A)))
 ```
 
+### 13.3 拦截返回事件
+
+#####  WillPopScope
+
+WillPopScope用于处理是否离开当前页面，在Flutter中有多种方式可以离开当前页面，比如AppBar、CupertinoNavigationBar上面的返回按钮，点击将会回到前一个页面，在Android手机上点击实体（虚拟）返回按钮，也将会回到前一个页面，此功能对于iOS程序员来说可能特别容易忽略。
+
+**以下几种情况我们会用到WillPopScope：**
+1. 需要询问用户是否退出。
+2. App中有多个Navigator，想要的是让其中一个 Navigator 退出，而不是直接让在 Widget tree 底层的 Navigator 退出
+
+##### 询问用户是否退出
+在Android App中最开始的页面点击后退按钮，默认会关闭当前activity并回到桌面，我们希望此时弹出对话框或者给出提示“再次点击退出”，避免用户的误操作。
+
+``` 
+WillPopScope(
+    onWillPop: () async => showDialog(
+        context: context,
+        builder: (context) =>
+            AlertDialog(title: Text('你确定要退出吗？'), actions: <Widget>[
+              RaisedButton(
+                  child: Text('退出'),
+                  onPressed: () => Navigator.of(context).pop(true)),
+              RaisedButton(
+                  child: Text('取消'),
+                  onPressed: () => Navigator.of(context).pop(false)),
+            ])),
+    child: Container(
+      alignment: Alignment.center,
+      child: Text('点击后退按钮，询问是否退出。'),
+    ))
+```
+
+我们也可以把效果做成快速点击2次退出：
+``` 
+DateTime _lastQuitTime;
+WillPopScope(
+    onWillPop: () async {
+      if (_lastQuitTime == null ||
+          DateTime.now().difference(_lastQuitTime).inSeconds > 1) {
+        print('再按一次 Back 按钮退出');
+        Scaffold.of(context)
+            .showSnackBar(SnackBar(content: Text('再按一次 Back 按钮退出')));
+        _lastQuitTime = DateTime.now();
+        return false;
+      } else {
+        print('退出');
+        Navigator.of(context).pop(true);
+        return true;
+      }
+    },
+    child: Container(
+      alignment: Alignment.center,
+      child: Text('点击后退按钮，询问是否退出。'),
+    ))
+```
