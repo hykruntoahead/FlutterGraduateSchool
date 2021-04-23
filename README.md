@@ -10581,3 +10581,100 @@ SQLite 创建成功后会在本地创建一个 **db_name.db** 的文件，文件
 
 
 
+### 14.5 网络请求-HttpClient
+
+本文介绍如何使用 **HttpClient** 进行网络请求，HttpClient 是 Dart标准库的一部分，无需引入第三方，但其本身功能较弱，对开发者不友好，使用比较麻烦，因此并**不建议直接使用 HttpClient 进行网络请求**。
+
+使用 HttpClient 进行网络请求步骤如下：
+
+1. 创建HttpClient：
+``` 
+import 'dart:io';
+
+var httpClient = new HttpClient(); 
+```
+ HttpClient需要导入dart:io包
+
+2.构建Uri:
+```
+var uri = Uri(scheme: 'https',host: 'www.xxx.com', queryParameters: {
+  'params1:': '',
+  'params2:': '',
+}); 
+```
+ - host：表示服务器的域名
+ - queryParameters：表示请求参数
+
+3.打开http连接
+```
+  HttpClientRequest request = await httpClient.getUrl(uri);
+```
+4.如果需要，设置 header，也可不设置：
+```
+ request.headers.add('name', 'value'); 
+```
+5.关闭请求,等待响应
+```
+ HttpClientResponse response = await request.close(); 
+```
+6.解析返回的数据：
+```
+ String responseBody = await response.transform(utf8.decoder).join();
+```
+
+下面通过 HttpClient 获取 https://github.com/781238222/flutter-do/blob/master/README.md 内容：
+
+``` 
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+
+///
+/// desc:
+///
+
+class HttpClientDemo extends StatefulWidget {
+  @override
+  _HttpClientDemoState createState() => _HttpClientDemoState();
+}
+
+class _HttpClientDemoState extends State<HttpClientDemo> {
+  String _data;
+
+  getData() async {
+    var httpClient = new HttpClient();
+    var uri = Uri(
+        scheme: 'https',
+        host: 'github.com',
+        path: '781238222/flutter-do/blob/master/README.md');
+
+    HttpClientRequest request = await httpClient.getUrl(uri);
+    request.headers.add('name', 'value');
+    HttpClientResponse response = await request.close();
+    String responseBody = await response.transform(utf8.decoder).join();
+    print('responseBody:$responseBody');
+    setState(() {
+      _data = responseBody;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('HttpClient'),
+      ),
+      body: Center(
+        child: Text('$_data'),
+      ),
+    );
+  }
+}
+```
