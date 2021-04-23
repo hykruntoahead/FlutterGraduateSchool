@@ -10769,3 +10769,175 @@ http 是一个可组合，基于Future的库，用于HTTP请求。该软件包�
    }
  }
 ```
+
+### 14.7 网络请求-dio
+
+**dio** 是一个强大的Dart Http请求库，支持Restful API、FormData、拦截器、请求取消、Cookie管理、文件上传/下载、超时、自定义适配器等...
+
+> pub 地址：https://pub.flutter-io.cn/packages/dio 
+> Github 地址：https://github.com/flutterchina/dio
+
+#####  引入软件包
+
+在 **pubspec.yaml** 中添加如下依赖：
+```
+ dependencies:
+   dio: ^3.0.10
+```
+
+执行命令：
+``` 
+flutter pub get
+```
+
+#####  基础使用
+
+发起 **get** 请求：
+```
+ Response response=await Dio().get('https://xxx.com/test?name=\'laomeng\'&page=1');
+ print(response.data.toString());
+```
+请求参数也可通过如下方式：
+```
+ Response response=await Dio().get("https://xxx.com/test",queryParameters: {'name':'laomeng','page':1});
+```
+
+发起 post 请求：
+```
+ Response response=await Dio().post("https://xxx.com/test",queryParameters: {'name':'laomeng','page':1});
+```
+
+发送 FormData :
+```
+ var formData = FormData.fromMap({
+   "name": "laomeng",
+   "page": 1,
+ });
+ Response response=await Dio().post('https://xxx.com/test',data:formData );
+
+```
+
+上传文件：
+```
+ var formData = FormData.fromMap({
+   'name': 'laomeng',
+   'file': await MultipartFile.fromFile("./text.txt",filename: "upload.txt"),
+   'files': [
+     await MultipartFile.fromFile("./text1.txt", filename: "text1.txt"),
+     await MultipartFile.fromFile("./text2.txt", filename: "text2.txt"),
+   ]
+ });
+ Response response=await Dio().post('https://xxx.com/test',data:formData );
+```
+
+监听上传进度：
+``` 
+ response = await Dio().post(
+   'https://xxx.com/test',
+   data: formData,
+   onSendProgress: (int sent, int total) {
+     print("$sent $total");
+   },
+ );
+```
+
+##### 拦截器
+
+拦截器可以在请求前或响应之后做统一的预处理，比如给所有的请求的header添加token等。添加 **打印日志** 拦截器，网络请求的相关信息会打印到控制台，方便调试和定位问题：
+
+``` 
+_dio = Dio(options)..interceptors.add(LogInterceptor());
+```
+
+**LogInterceptor** 是 Dio 包自带的拦截器。
+
+自定义拦截器：
+```
+ class MyInterceptor extends Interceptor{
+   
+   @override
+   Future onRequest(RequestOptions options) {
+     // TODO: implement onRequest
+     return super.onRequest(options);
+   }
+   
+   @override
+   Future onResponse(Response response) {
+     // TODO: implement onResponse
+     return super.onResponse(response);
+   }
+   
+   @override
+   Future onError(DioError err) {
+     // TODO: implement onError
+     return super.onError(err);
+   }
+   
+ }
+```
+
+onRequest 请求前调用，一般是添加请求的公共部分，比如添加 token：
+```
+ @override
+ Future onRequest(RequestOptions options) {
+   options.headers['token'] = 'token';
+   return super.onRequest(options);
+ }
+```
+onResponse 响应后调用，一般用于通用数据解析等。
+
+onError 请求发生异常时调用，一般用于异常功能处理。
+
+##### 请求取消
+
+通过 cancel token 取消请求:
+
+```
+ CancelToken cancelToken = CancelToken();
+ 
+ Response response = await Dio().post("https://xxx.com/test",
+ 	queryParameters: {'name': 'laomeng', 'page': 1},
+ 	cancelToken: cancelToken);
+```
+取消:
+``` 
+cancelToken.cancel();
+```
+
+##### Dio 封装
+使用 Dio 的时候通常会创建一个单例并设置默认配置：
+```
+ ///
+ /// des: dio 封装
+ ///
+ class HttpManager {
+   factory HttpManager() => _getInstance();
+   static HttpManager _instance;
+ 
+   Dio get http => _dio;
+   Dio _dio;
+ 
+   static const int CONNECT_TIMEOUT = 50000;
+   static const int RECEIVE_TIMEOUT = 30000;
+ 
+   static _getInstance() {
+     if (_instance == null) {
+       _instance = HttpManager._();
+     }
+     return _instance;
+   }
+ 
+   ///
+   /// 初始化
+   ///
+   HttpManager._() {
+     var options = BaseOptions(
+         connectTimeout: CONNECT_TIMEOUT, receiveTimeout: RECEIVE_TIMEOUT);
+     _dio = Dio(options)..interceptors.add(LogInterceptor());
+   }
+ }
+```
+使用：
+```
+ HttpManager().http.post('');
+```
