@@ -10115,3 +10115,469 @@ Future<String> _readData() async {
  }
 ```
 
+### 14.3 大量复杂数据持久化
+
+保存数据到本地是应用程序非常重要的功能之一，比如如下场景：一个新闻类或者博客类的应用程序，打开后进入首页，如果本地没有保存数据，则需要通过网络获取数据，在返回数据之前，用户看到的是空白页面，而如果本地保存了部分新闻，则显示这部分数据，等待最新的数据返回时在刷新即可，对用户体验来说，明显第二种体验更佳。
+
+**SQLite** 是目前最受欢迎的本地存储框架之一，此篇文章将会介绍如何使用 SQLite 保存、查询、删除数据等。
+
+> SQLite pub地址：https://pub.flutter-io.cn/packages/sqflite 
+> SQLite Github：https://github.com/tekartik/sqflite 
+> SQLite 讲解：https://www.sqlitetutorial.net/
+
+如果您对数据库和 SQL 语句相关知识有一点了解，下面的讲解会比较容易理解，如果对数据库和 SQL 语句相关知识一点不了解，那下面的讲解理解起来可能会有一定的难度。
+
+那是否需要先去学习数据库和 SQL 语句相关知识？我觉得没有必要，应用程序使用的数据库和 SQL 语句相关知识都是非常基础的，比如打开数据库、创建表、SQL 查询语句、更新语句、删除语句等，这些都是固定的格式，固定语句记住即可。
+
+##### 添加依赖
+ SQLite 并不是 Flutter 系统自带的，而是一个第三方插件，在项目的 **pubspec.yaml** 文件中添加依赖：
+ ``` 
+ dependencies:
+   sqflite: ^1.3.1
+   path_provider: ^1.6.11
+ ```
+执行命令：
+```
+ flutter pub get
+```
+
+使用 SQLite 创建数据库的时候需要本地路径做为参数，所以添加path_provider 插件获取本地路径。
+
+##### 单例模式创建 SQLite 访问
+ 使用 SQLite 并不是一定要使用单例模式，单例模式是为了保证整个应用程序仅有一个数据库实例和全局访问。
+ 
+ ```
+  class DBProvider{
+  
+    static final DBProvider _singleton = DBProvider._internal();
+  
+    factory DBProvider() {
+      return _singleton;
+    }
+  
+    DBProvider._internal();
+  }
+ ```
+
+初始化数据库
+```
+ import 'dart:io';
+ import 'package:path/path.dart';
+ import 'package:path_provider/path_provider.dart';
+ import 'package:sqflite/sqflite.dart';
+ 
+ class DBProvider {
+   static final DBProvider _singleton = DBProvider._internal();
+ 
+   factory DBProvider() {
+     return _singleton;
+   }
+ 
+   DBProvider._internal();
+ 
+   static Database _db;
+ 
+   Future<Database> get db async {
+     if (_db != null) {
+       return _db;
+     }
+     _db = await _initDB();
+     return _db;
+   }
+ 
+   Future<Database> _initDB() async {
+     Directory documentsDirectory = await getApplicationDocumentsDirectory();
+     String path = join(documentsDirectory.path, 'dbName');
+     return await openDatabase(path,
+         version: 1, onCreate: _onCreate, onUpgrade: _onUpgrade);
+   }
+ 
+   ///
+   /// 创建Table
+   ///
+   Future _onCreate(Database db, int version) async {}
+ 
+   ///
+   /// 更新Table
+   ///
+   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {}
+ }
+```
+
+创建 Table，Table 代表一张表，下面创建一张用户表，表列有 id（唯一标识）、name（姓名）、age（年龄）、sex（性别）。
+
+```
+ ///
+ /// 创建Table
+ ///
+ Future _onCreate(Database db, int version) async {
+   return await db.execute("CREATE TABLE User ("
+       "id integer primary key AUTOINCREMENT,"
+       "name TEXT,"
+       "age TEXT,"
+       "sex integer"
+       ")");
+ }
+```
+
+#####  保存数据
+
+先创建一个 User 的 Model 类，用于数据的保存：
+``` 
+class User {
+  int id;
+  String name;
+  int age;
+  int sex;
+
+  User({this.id, this.name, this.age, this.sex});
+
+  User.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    age = json['age'];
+    sex = json['sex'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['age'] = this.age;
+    data['sex'] = this.sex;
+    return data;
+  }
+}
+```
+保存数据：
+```
+ Future saveData(User user) async {
+   var _db = await db;
+   return await _db.insert('User', user.toJson());
+ }
+
+```
+
+案例：输入姓名、年龄、性别，点击保存
+
+```
+ class _AddUser extends StatefulWidget {
+   @override
+   __AddUserState createState() => __AddUserState();
+ }
+ 
+ class __AddUserState extends State<_AddUser> {
+   String _radioGroupValue = '0';
+   TextEditingController _nameController;
+   TextEditingController _ageController;
+ 
+   @override
+   void initState() {
+     super.initState();
+     _nameController = TextEditingController();
+     _ageController = TextEditingController();
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+         title: Text('保存数据'),
+       ),
+       body: Column(
+         children: <Widget>[
+           Row(
+             children: <Widget>[
+               Text('姓名：'),
+               Flexible(
+                 child: TextField(
+                   controller: _nameController,
+                 ),
+               ),
+             ],
+           ),
+           Row(
+             children: <Widget>[
+               Text('年龄：'),
+               Flexible(
+                 child: TextField(
+                   controller: _ageController,
+                 ),
+               ),
+             ],
+           ),
+           Row(
+             children: <Widget>[
+               Text('性别：'),
+               Flexible(
+                 child: RadioListTile(
+                   title: Text('男'),
+                   value: '0',
+                   groupValue: _radioGroupValue,
+                   onChanged: (value) {
+                     setState(() {
+                       _radioGroupValue = value;
+                     });
+                   },
+                 ),
+               ),
+               Flexible(
+                 child: RadioListTile(
+                   title: Text('女'),
+                   value: '1',
+                   groupValue: _radioGroupValue,
+                   onChanged: (value) {
+                     setState(() {
+                       _radioGroupValue = value;
+                     });
+                   },
+                 ),
+               ),
+             ],
+           ),
+           Builder(
+             builder: (context) {
+               return RaisedButton(
+                 child: Text('保存'),
+                 onPressed: () async {
+                   var user = User(
+                       name: '${_nameController.text}',
+                       age: int.parse('${_ageController.text}'),
+                       sex: int.parse('$_radioGroupValue'));
+ 
+                   int result = await DBProvider().saveData(user);
+                   if (result > 0) {
+                     Scaffold.of(context).showSnackBar(SnackBar(
+                       content: Text('保存数据成功，result:$result'),
+                     ));
+                   } else {
+                     Scaffold.of(context).showSnackBar(SnackBar(
+                       content: Text('保存数据失败，result:$result'),
+                     ));
+                   }
+                 },
+               );
+             },
+           )
+         ],
+       ),
+     );
+   }
+ } 
+```
+
+使用 SQL 语句保存数据：
+```
+Future rawInsert(User user) async {
+  var _db = await db;
+  return await _db.rawInsert(
+      'INSERT Into User (name,age,sex) VALUES (?,?,?)',[user.name,user.age,user.sex]);
+}  
+```
+
+#####  查询数据
+
+查询全部数据：
+```
+ Future<List<User>> findAll() async {
+     var _db = await db;
+     List<Map<String, dynamic>> result = await _db.query('User');
+ 
+     return result.isNotEmpty ? result.map((e) {
+       return User.fromJson(e);
+     }).toList():[];
+   } 
+```
+将查询的数据显示在表格上：
+```
+  class DatabaseDemo extends StatefulWidget {
+    @override
+    _DatabaseDemoState createState() => _DatabaseDemoState();
+  }
+  
+  class _DatabaseDemoState extends State<DatabaseDemo> {
+    List<User> _list = [];
+  
+    @override
+    void initState() {
+      super.initState();
+      _loadData();
+    }
+  
+    _loadData() async {
+      _list = await DBProvider().findAll();
+      setState(() {});
+    }
+  
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Sqlite Demo'),
+        ),
+        body: Column(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                RaisedButton(
+                  child: Text('查询数据'),
+                  onPressed: (){
+                    _loadData();
+                  },
+                ),
+                RaisedButton(
+                  child: Text('添加数据'),
+                  onPressed: (){
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                      return _AddUser();
+                    }));
+                  },
+                ),
+              ],
+            ),
+            Table(
+              children: [
+                TableRow(children: [
+                  TableCell(child: Text('id')),
+                  TableCell(child: Text('姓名')),
+                  TableCell(child: Text('年龄')),
+                  TableCell(child: Text('性别')),
+                ]),
+                ..._list.map((user) {
+                  return TableRow(children: [
+                    TableCell(child: Text('${user.id}')),
+                    TableCell(child: Text('${user.name}')),
+                    TableCell(child: Text('${user.age}')),
+                    TableCell(child: Text(user.sex == 0 ? '男' : '女')),
+                  ]);
+                }).toList()
+              ],
+            )
+          ],
+        ),
+      );
+    }
+  }
+```
+
+根据条件查询，比如查询年龄为12的数据：
+```
+ Future<List<User>> find(int age) async {
+     var _db = await db;
+     List<Map<String, dynamic>> result =
+         await _db.query('User', where: 'age = ?', whereArgs: [age]);
+ 
+     return result.isNotEmpty ? result.map((e) {
+       return User.fromJson(e);
+     }).toList():[];
+   }
+```
+
+使用：
+```
+ _loadData() async {
+   _list = await DBProvider().find(12);
+   setState(() {});
+ }
+```
+
+#####  更新数据
+
+根据 User id 更新数据：
+```
+ Future<int> update(User user) async {
+   var _db = await db;
+   return await _db
+       .update('User', user.toJson(), where: 'id = ?', whereArgs: [user.id]);
+ }
+```
+
+跳转到修改数据页面：
+```
+ RaisedButton(
+   child: Text('修改第一行数据'),
+   onPressed: () {
+     if (_list.length > 1) {
+       Navigator.of(context)
+           .push(MaterialPageRoute(builder: (context) {
+         return _AddUser(
+           user: _list[0],
+         );
+       }));
+     }
+   },
+ ),
+```
+保存修改的数据：
+```
+ RaisedButton(
+   child: Text('保存'),
+   onPressed: () async {
+     var user = User(
+         name: '${_nameController.text}',
+         age: int.parse('${_ageController.text}'),
+         sex: int.parse('$_radioGroupValue'));
+     if (widget.user == null) {
+       _saveData(context,user);
+     } else {
+       _updateData(context,user);
+     }
+   },
+ )
+ 
+ _updateData(BuildContext context,User user) async {
+     user.id = widget.user.id;
+     int result = await DBProvider().update(user);
+     if (result > 0) {
+       Scaffold.of(context).showSnackBar(SnackBar(
+         content: Text('修改数据成功，result:$result'),
+       ));
+     } else {
+       Scaffold.of(context).showSnackBar(SnackBar(
+         content: Text('修改数据失败，result:$result'),
+       ));
+     }
+   } 
+```
+
+#####  删除数据
+
+根据 id 删除符合条件的数据：
+```
+ Future<int> delete(int id) async {
+   var _db = await db;
+   return await _db.delete('User', where: 'id = ?', whereArgs: [id]);
+ }
+```
+
+删除第一行数据，删除成功后刷新数据：
+
+```
+ RaisedButton(
+   child: Text('删除第一行数据'),
+   onPressed: () async {
+     if (_list.length > 0) {
+       await DBProvider().delete(_list[0].id);
+       _loadData();
+     }
+   },
+ ),
+```
+
+删除全部数据：
+```
+ Future<int> deleteAll() async {
+   var _db = await db;
+   return await _db.delete('User');
+ } 
+```
+
+ 
+##### 总结
+
+我们介绍了 SQLite 的基本用法，数据的增删改查是使用频率最高的，SQLite 还有一些高级的查询语句，比如分组、联合查询等，这些用到的频率不多。
+
+SQLite 创建成功后会在本地创建一个 db_name.db 的文件，文件的目录就是初始化数据库时设置的目录。
+
+
+
