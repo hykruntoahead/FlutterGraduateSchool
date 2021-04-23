@@ -9949,3 +9949,169 @@ create 中有一个可选参数 recursive，默认值为 false,为 false 时只�
 ```
 
 
+### 14.3 简单数据持久化
+
+保存数据到本地磁盘是应用程序常用功能之一，比如保存用户登录信息、用户配置信息等。而保存这些信息通常使用 **shared_preferences**，它保存数据的形式为 Key-Value（键值对），支持 Android 和 iOS。shared_preferences 是一个第三方插件，在 Android 中使用 **SharedPreferences**，在 iOS中使用 **NSUserDefaults**。
+
+为什么要使用 shared_preferences ？如下场景，在设置页面中有多个标识，比如是否允许4G下载、主题、字体大小等，希望这些设置改变后退出应用程序，再次进入，这些设置依然有效。
+
+首先将这些设置保存在内存中明显无法达到要求，因为退出应用程序内存也会释放，那上传到服务器呢？再次进入的时候拉取服务器配置数据，这种方案有两个弊端：
+
+1. 用户的在无网络的情况下失效。
+2. 响应延迟，消耗不必要的流量。
+
+基于以上需求，这些配置需要持久化的保存在本地，而 shared_preferences 就是最受欢迎的框架之一， 适用于简单数据的持久化，复杂且大量数据的持久化建议使用 SQLite。
+
+shared_preferences 持久化保存数据，但在一下情况下会删除数据：
+
+- 卸载应用程序
+- 在设置中清除应用数据
+
+##### 添加依赖
+在项目的 **pubspec.yaml** 文件中添加依赖：
+```
+dependencies:
+    shared_preferences: ^0.5.8 
+```
+执行命令：
+```
+ flutter pub get
+```
+
+##### 保存/读取数据
+shared_preferences 支持的数据类型有 int、double、bool、string、stringList。 
+
+**int**
+
+保存数据：
+```
+ _saveData() async {
+   var prefs = await SharedPreferences.getInstance();
+   prefs.setInt('Key_Int', 12);
+ }
+```
+读取数据：
+```
+ Future<int> _readData() async {
+   var prefs = await SharedPreferences.getInstance();
+   var result = prefs.getInt('Key_Int');
+   return result ?? 0;
+ }
+```
+
+**double**
+
+保存数据：
+
+``` 
+_saveData() async {
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setDouble('Key_Double', 12.0);
+  }
+```
+
+读取数据：
+```
+ Future<double> _readData() async {
+     var prefs = await SharedPreferences.getInstance();
+     var result = prefs.getDouble('Key_Double');
+     return result ?? 0.0;
+   }
+```
+
+**bool**
+
+保存数据：
+```
+ _saveData() async {
+   var prefs = await SharedPreferences.getInstance();
+   prefs.setBool('Key_Bool', true);
+ }
+```
+
+读取数据：
+```
+ Future<bool> _readData() async {
+   var prefs = await SharedPreferences.getInstance();
+   var result = prefs.getBool('Key_Bool');
+   return result ?? false;
+ }
+```
+
+** String**
+保存数据：
+```
+ _saveData() async {
+   var prefs = await SharedPreferences.getInstance();
+   prefs.setString('Key', 'laomeng');
+ }
+```
+
+读取数据：
+``` 
+Future<String> _readData() async {
+  var prefs = await SharedPreferences.getInstance();
+  var result = prefs.getString('Key');
+  return result ?? '';
+}
+```
+
+**stringList**
+保存数据：
+```
+ _saveData() async {
+   var prefs = await SharedPreferences.getInstance();
+   prefs.setStringList('Key_StringList', ['laomeng','Flutter']);
+ }
+```
+读取数据：
+```
+ Future<List<String>> _readData() async {
+   var prefs = await SharedPreferences.getInstance();
+   var result = prefs.getStringList('Key_StringList');
+   return result ?? [];
+ }
+```
+
+上面读取数据时都有如下操作：
+```
+ return result ?? '';
+```
+
+因为读取数据时，如果没有当前 Key 则返回 null，所以使用 ?? 操作符，如果 result 为 null，则返回 ?? 操作符后面的值。
+
+##### 删除数据
+删除指定 Key 的数据：
+```
+ Future<bool> _deleteData() async {
+   var prefs = await SharedPreferences.getInstance();
+   prefs.remove('Key');
+ }
+```
+
+清除所有数据：
+```
+ Future<bool> _clearData() async {
+   var prefs = await SharedPreferences.getInstance();
+   prefs.clear();
+ }
+```
+此方法谨慎使用。
+
+##### Key 相关操作
+获取所有的 Key：
+```
+ Future<Set<String>> _getKeys() async {
+   var prefs = await SharedPreferences.getInstance();
+   var keys = prefs.getKeys();
+   return keys ?? [];
+ }
+```
+检测 Key 是否存在：
+```
+ Future<bool> _containsKey() async {
+   var prefs = await SharedPreferences.getInstance();
+   return prefs.containsKey('Key') ?? false;
+ }
+```
+
