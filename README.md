@@ -9453,3 +9453,498 @@ class _TabMainState extends State<TabMain> {
 ```
 使用TabView、BottomNavigationBar、CupertinoTabView这些组件时也是一样的原理，只需在每一个Tab中加入Navigator，不要忘记指定key。
 
+## 14.数据存储和网络请求
+
+###14.1 文件系统目录 - path_provider
+
+不同的平台对应的文件系统是不同的，比如文件路径，因此 Flutter 中获取文件路径需要原生支持，原生端通过 MethodChannel 传递文件路径到 Flutter，如果没有特殊的需求，推荐大家使用 Google 官方维护的插件 **path_provider**。
+
+> pub 地址：https://pub.flutter-io.cn/packages/path_provider 
+>
+> Github 地址：https://github.com/flutter/plugins/tree/master/packages/path_provider/path_provider
+  
+##### 添加依赖
+
+在项目的 **pubspec.yaml** 文件中添加依赖：
+
+```
+ dependencies:
+   path_provider: ^1.6.14
+```
+
+执行命令:
+```
+ flutter pub get
+```
+
+#####  文件路径
+
+**path_provider** （版本：1.6.14）提供了8个方法获取不同的文件路径，目前 Flutter（Flutter 1.20.1 • channel stable ）只发布了正式版本的 Android 和 iOS，因此下面仅介绍 Android 和 iOS 平台的文件路径。
+
+**getTemporaryDirectory**
+
+临时目录，适用于下载的缓存文件，此目录随时可以清除，此目录为应用程序私有目录，其他应用程序无法访问此目录。
+
+Android 上对应getCacheDir。
+
+iOS上对应NSCachesDirectory。
+
+
+**getApplicationSupportDirectory**
+
+应用程序可以在其中放置应用程序支持文件的目录的路径。
+
+将此文件用于您不想向用户公开的文件。 您的应用不应将此目录用于存放用户数据文件。
+
+在iOS上，对应NSApplicationSupportDirectory ，如果此目录不存在，则会自动创建。 在Android上，对应getFilesDir。
+
+
+**getLibraryDirectory**
+
+应用程序可以在其中存储持久性文件，备份文件以及对用户不可见的文件的目录路径，例如storage.sqlite.db。
+
+在Android上，此函数抛出[UnsupportedError]异常，没有等效项路径存在。
+
+
+**getApplicationDocumentsDirectory**
+
+应用程序可能在其中放置用户生成的数据或应用程序无法重新创建的数据的目录路径。
+
+在iOS上，对应NSDocumentDirectory API。 如果数据不是用户生成的，考虑使用[getApplicationSupportDirectory]。
+
+在Android上，对应getDataDirectory API。 如果要让用户看到数据，请考虑改用[getExternalStorageDirectory]。
+
+
+**getExternalStorageDirectory**
+
+应用程序可以访问顶级存储的目录的路径。由于此功能仅在Android上可用，因此应在发出此函数调用之前确定当前操作系统。
+
+在iOS上，此功能会引发[UnsupportedError]异常，因为无法在应用程序的沙箱外部访问。
+
+在Android上，对应getExternalFilesDir（null）。
+
+
+**getExternalCacheDirectories**
+
+存储特定于应用程序的外部缓存数据的目录的路径。 这些路径通常位于外部存储（如单独的分区或SD卡）上。 电话可能具有多个可用的存储目录。 由于此功能仅在Android上可用，因此应在发出此函数调用之前确定当前操作系统。 在iOS上，此功能会抛出UnsupportedError，因为这是不可能的在应用程序的沙箱外部访问。
+
+在Android上，对应Context.getExternalCacheDirs（）或API Level 低于19的Context.getExternalCacheDir（）。
+
+
+**getExternalStorageDirectories**
+
+可以存储应用程序特定数据的目录的路径。 这些路径通常位于外部存储（如单独的分区或SD卡）上。 由于此功能仅在Android上可用，因此应在发出此函数调用之前确定当前操作系统。 在iOS上，此功能会抛出UnsupportedError，因为这是不可能的在应用程序的沙箱外部访问。 在Android上，对应Context.getExternalFilesDirs（String type）或API Level 低于19的Context.getExternalFilesDir（String type）。
+
+
+**getDownloadsDirectory**
+
+存储下载文件的目录的路径，这通常仅与台式机操作系统有关。 在Android和iOS上，此函数将引发[UnsupportedError]异常。
+
+如果没有 Android 或者 iOS开发经验，看完上面的说明应该是一脸懵逼的，这么多路径到底用哪个？有什么区别？下面从 Android 和 iOS 平台的角度介绍其文件路径，最后给出路径使用的建议以及使用过程中需要注意的事项。
+
+
+#####  Android 文件存储
+
+Android 文件存储分为**内部存储**和**外部存储**。
+
+用于保存应用的私有文件，其他应用无法访问这些数据，创建的文件在此应用的包名目录下，没有 root 权限 的手机无法在手机的 文件管理 应用中看到此目录，不过可以通过 Android Studio 工具查看，路径为：data/data/包名.
+
+包名下具体的目录结构：
+
+- cache 目录：对应 getTemporaryDirectory 方法，用于缓存文件，此目录随时可能被系统清除。
+- files 目录：对应 getApplicationSupportDirectory 方法。
+- code_cache：此目录存储 Flutter 相关代码和资源。
+    flutter_engine/skia：Flutter 渲染引擎。
+    flutter_guidePVWGWK/flutter_guide/build/flutter_assets：Flutter 资源文件。
+- shared_prefs： SharePreferences 的默认路径。
+- app_flutter：对应 getApplicationDocumentsDirectory方法。
+- app_flutter/dbName：使用 sqlite 的默认路径，sqlite 也可以指定位置。
+
+**SharePreferences** 和 **sqlite** 是两种保存数据的第三方插件。
+
+内部存储的特点：
+ - 安全性，其他应用无法访问这些数据。
+ - 当应用卸载的时候，这些数据也会被删除，避免垃圾文件。
+ - 不需要申请额外权限。
+ - 存储的空间有限，此目录数据随时可能被系统清除，也可以通过 设置 中的 清除数据 可以清除此目录数据。
+ - 国内特色，不同手机厂商对此目录做了不同的限制，比如总体大小限制、单个应用程序所占空间大小限制、清除数据策略不同等。
+ 
+ 
+ ##### 外部存储
+ 
+ 外部存储可以通过手机的 文件管理 应用查看.
+ 
+ 这里面有一个特殊的目录：Android/data/包名.这个目录和内部存储目录非常相似，一个包名代表一个应用程序.
+ 
+- cache：缓存目录，对应 **getExternalCacheDirectories** 方法。
+- files：对应 **getExternalStorageDirectories** 方法。
+
+此目录的特点：
+
+- 当应用卸载的时候，这些数据也会被删除，避免垃圾文件。
+- 不需要申请额外权限。
+- 空间大且不会被系统清除，通过 设置 中的 清除数据 可以清除此目录数据。
+- 用户可以直接对文件进行删除、导入操作。
+ 
+ 外部存储除了 **Android/data/** 目录，还有和此目录同级的目录，特点：
+ 
+- 所有应用程序均可访问。
+- 用户可以直接对文件进行删除、导入操作。
+- 需要申请**读写权限**。
+
+Android 官方对此目录的管理越来越严格， Android 11 系统已经开始强制执行分区存储，详情见：https://developer.android.com/preview/privacy/storage?hl=zh-cn 
+
+上面说了这么多，总结如下：
+
+- **SharePreferences** 和 **sqlite** 数据建议存放在内部存储，插件已经帮我们完成了，无需手动处理。
+- 严格保密的数据，比如用户数据，建议存放在内部存储，对应 **getApplicationSupportDirectory** 方法。
+- 其余所有的数据建议存放 Android/data/包名/ ，对应 getExternalCacheDirectories 和 getExternalStorageDirectories 方法。
+
+#####  iOS 文件存储
+
+iOS 文件存储相比 Android 要简单的多，因为 iOS 对用户隐私保护非常严格，每个 iOS 应用程序都有一个单独的文件系统，而且只能在对应的文件系统中进行操作，此区域被称为沙盒。
+
+每个应用沙盒含有3个文件夹：Documents, Library 和 tmp.
+
+- Documents：应用程序数据文件写入到这个目录下。这个目录用于存储用户数据。保存应用程序的重要数据文件和用户数据文件等。iTunes 同步时会备份该目录，对应 getApplicationDocumentsDirectory 方法。
+- Library：对应 getLibraryDirectory 方法。
+
+    - Caches：保存应用程序使用时产生的支持文件、缓存文件、日志文件等，比如下载的音乐,视频,SDWebImage缓存等。对应 getTemporaryDirectory 方法。
+    - Preferences：包含应用程序的偏好设置文件，iCloud会备份设置信息。
+    - Application Support：对应 getApplicationSupportDirectory 方法。
+
+- tmp：存放临时文件，不会被备份，而且这个文件下的数据有可能随时被清除的可能，按照官方说法每三天清理一次缓存数据
+
+#####  path_provider 使用
+
+```
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+
+///
+/// desc:
+///
+
+class PathProviderDemo extends StatefulWidget {
+  @override
+  _PathProviderDemoState createState() => _PathProviderDemoState();
+}
+
+class _PathProviderDemoState extends State<PathProviderDemo> {
+  Future<Directory> _tempDirectory;
+  Future<Directory> _appSupportDirectory;
+  Future<Directory> _appLibraryDirectory;
+  Future<Directory> _appDocumentsDirectory;
+  Future<Directory> _externalStorageDirectory;
+  Future<List<Directory>> _externalStorageDirectories;
+  Future<List<Directory>> _externalCacheDirectories;
+  Future<Directory> _downloadDirectory;
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _tempDirectory = getTemporaryDirectory();
+      _appSupportDirectory = getApplicationSupportDirectory();
+      _appLibraryDirectory = getLibraryDirectory();
+      _appDocumentsDirectory = getApplicationDocumentsDirectory();
+      _externalStorageDirectory = getExternalStorageDirectory();
+      _externalCacheDirectories = getExternalCacheDirectories();
+      _externalStorageDirectories = getExternalStorageDirectories();
+      _downloadDirectory = getDownloadsDirectory();
+    });
+  }
+
+  Widget _buildDirectory(
+      BuildContext context, AsyncSnapshot<Directory> snapshot) {
+    Text text = const Text('');
+    if (snapshot.connectionState == ConnectionState.done) {
+      if (snapshot.hasError) {
+        text = Text('Error: ${snapshot.error}');
+      } else if (snapshot.hasData) {
+        text = Text('path: ${snapshot.data.path}');
+      } else {
+        text = const Text('path unavailable');
+      }
+    }
+    return Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: text);
+  }
+
+  Widget _buildDirectories(
+      BuildContext context, AsyncSnapshot<List<Directory>> snapshot) {
+    Text text = const Text('');
+    if (snapshot.connectionState == ConnectionState.done) {
+      if (snapshot.hasError) {
+        text = Text('Error: ${snapshot.error}');
+      } else if (snapshot.hasData) {
+        final String combined =
+            snapshot.data.map((Directory d) => d.path).join(', ');
+        text = Text('paths: $combined');
+      } else {
+        text = const Text('path unavailable');
+      }
+    }
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16), child: text);
+  }
+
+  Widget _buildItem(String title, Future<Directory> future) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(title),
+        ),
+        FutureBuilder<Directory>(future: future, builder: _buildDirectory),
+      ],
+    );
+  }
+
+  Widget _buildItem1(String title, Future<List<Directory>> future) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(title),
+        ),
+        FutureBuilder<List<Directory>>(
+            future: future,
+            builder: _buildDirectories),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: ListView(
+          itemExtent: 120,
+          children: <Widget>[
+            _buildItem('getTemporaryDirectory', _tempDirectory),
+            _buildItem('getApplicationSupportDirectory', _appSupportDirectory),
+            _buildItem('getLibraryDirectory', _appLibraryDirectory),
+            _buildItem(
+                'getApplicationDocumentsDirectory', _appDocumentsDirectory),
+            _buildItem(
+                'getExternalStorageDirectory', _externalStorageDirectory),
+            _buildItem('getDownloadsDirectory', _downloadDirectory),
+
+            _buildItem1('getExternalStorageDirectories',_externalStorageDirectories),
+            _buildItem1('getExternalCacheDirectories',_externalCacheDirectories),
+
+          ],
+        ),
+      ),
+    );
+  }
+}  
+```
+
+Android 系统各个路径：
+
+![Android](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/path_provider_android.jpg)
+
+iOS 系统各个路径：
+
+![iOS](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/path_provider_ios.png)
+
+
+### 14.2 文件读写
+
+#####  文件夹
+
+
+**创建**
+
+创建文件夹：
+```
+ _createDir() async {
+     Directory documentsDirectory = await getApplicationDocumentsDirectory();
+     String path = '${documentsDirectory.path}${Platform.pathSeparator}dirName';
+     var dir = Directory(path);
+     var exist = dir.existsSync();
+     if (exist) {
+       print('当前文件夹已经存在');
+     } else {
+       var result = await dir.create();
+       print('$result');
+     }
+   }
+```
+
+Platform.pathSeparator表示路径分隔符，对于Android和iOS来说表示‘/’。
+
+create 中有一个可选参数 recursive ，默认值为 false，false 表示只能创建最后一级文件夹，如果创建 “dir1/dir2” 这种嵌套文件夹，recursive为 false 时将抛出异常，设置为 true 可以创建嵌套文件夹。下面在根目录创建“dir1/dir2”文件夹，代码如下：
+
+```
+  var dir2 =await Directory('${documentsDirectory.path}${Platform.pathSeparator}dir1${Platform.pathSeparator}dir2${Platform.pathSeparator}')
+      .create(recursive: true);
+```
+
+**遍历**
+遍历文件夹下文件：
+``` 
+_dirList() async {
+  Directory documentsDirectory = await getApplicationDocumentsDirectory();
+  String path = '${documentsDirectory.path}${Platform.pathSeparator}dirName';
+
+  Stream<FileSystemEntity> fileList = Directory(path).list();
+
+  await for(FileSystemEntity fileSystemEntity in fileList){
+    print('$fileSystemEntity');
+  }
+}
+```
+
+可选参数recursive，默认值为false，表示只遍历当前目录；设置为true时表示遍历当前目录及子目录。
+
+判断文件的类型：
+```
+ await for(FileSystemEntity fileSystemEntity in fileList){
+   print('$fileSystemEntity');
+   FileSystemEntityType type = FileSystemEntity.typeSync(fileSystemEntity.path);
+ }
+```
+
+文件的类型：
+
+- file：文件
+- directory：文件夹
+- link：链接文件
+- notFound：未知 
+
+**重命名**
+重命名文件夹名称：
+
+```
+  _dirRename() async{
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = '${documentsDirectory.path}${Platform.pathSeparator}dirName';
+    var dir = Directory(path);
+    var dir3= await dir.rename('${dir.parent.absolute.path}${Platform.pathSeparator}dir3');
+  }
+```
+
+**删除**
+删除文件夹：
+
+```
+_deleteDir() async {
+  Directory documentsDirectory = await getApplicationDocumentsDirectory();
+  String path = '${documentsDirectory.path}${Platform.pathSeparator}dir3';
+  var dir = await Directory(path).delete();
+} 
+```
+
+delete中有一个可选参数recursive，默认值为false,为false时如果删除的文件夹下还有内容将无法删除，抛出异常；设置为true时，删除当前文件夹及文件夹下所有内容
+
+
+#####  文件
+
+**创建**
+创建一个 file.txt 文件：
+```
+ _createFile() async {
+   Directory documentsDirectory = await getApplicationDocumentsDirectory();
+   String path = '${documentsDirectory.path}${Platform.pathSeparator}dirName${Platform.pathSeparator}file.txt';
+ 
+   var file = await File(path).create(recursive: true);
+ } 
+```
+create 中有一个可选参数 recursive，默认值为 false,为 false 时只创建文件，文件夹路径不存在抛出异常；设置为 true 时，创建文件及不存在的路径文件夹。
+
+**写入数据**
+
+向 file.txt 文件写入字符串：
+```
+ file.writeAsString('  Flutter');
+```
+
+向 file.txt 文件写入 bytes 数据：
+```
+ file.writeAsBytes(Utf8Encoder().convert("  Flutter bytes 格式"));
+```
+
+上面两种方法都是覆盖写入，向末尾追加内容：
+```
+ file.openWrite(mode: FileMode.append).write('Flutter 追加到末尾');
+
+```
+
+**读取数据**
+
+一行一行的读取数据：
+```
+ List<String> lines = await file.readAsLines();
+ lines.forEach((element) {
+   print('$element');
+ }); 
+```
+读取 bytes 并转换为String：
+```
+ Utf8Decoder().convert(await file.readAsBytes());
+```
+
+**删除**
+删除文件：
+```
+ file.delete();
+```
+
+
+##### 读取 asset 文件
+读取项目中文件，比如 asset/json/data.json 文件，data.json 文件中为 json 格式数据，数据为：
+```
+ [
+   {
+     "title":"致Flutter初学者",
+     "desc":"很多东西的学习，尽快入坑学习、动手实践远比畏畏缩缩、进度停留了解阶段要好得多，这是一个很简单的道理，可是偏偏很多人不明白或者做不到。",
+     "url":"http://laomengit.com/",
+     "tags":""
+   },
+   {
+     "title":"Flutter 学习路线图",
+     "desc":"Flutter越来越火，学习Flutter的人越来越多，对于刚接触Flutter的人来说最重要的是如何学习Flutter，重点学习Flutter的哪些内容",
+     "url":"http://laomengit.com/flutter/roadmap.html",
+     "tags":""
+   },
+   {
+     "title":"Flutter App 升级功能",
+     "desc":"应用程序升级功能是App的基础功能之一，如果没有此功能会造成用户无法升级，应用程序的bug或者新功能老用户无法触达，甚至损失这部分用户。",
+     "url":"http://laomengit.com/flutter/articles/app_upgrade.html",
+     "tags":""
+   },
+   {
+     "title":"Flutter绘制玫瑰",
+     "desc":"Flutter绘制玫瑰",
+     "url":"http://laomengit.com/flutter/articles/rose.html",
+     "tags":""
+   }
+ ]
+
+```
+
+读取数据并转换：
+```
+ _loadAsset(BuildContext context) async{
+   var jsonStr = await DefaultAssetBundle.of(context)
+       .loadString('assets/json/data.json');
+   var list = json.decode(jsonStr);
+   list.forEach((element) {
+     print('$element');
+   });
+ }
+```
+
+在项目的 pubspec.yaml 文件中添加配置：
+```
+ assets:
+   - assets/json/
+```
+
