@@ -10678,3 +10678,94 @@ class _HttpClientDemoState extends State<HttpClientDemo> {
   }
 }
 ```
+
+### 14.6 网络请求-http
+http 是一个可组合，基于Future的库，用于HTTP请求。该软件包包含高级功能和类，可轻松使用HTTP资源。它是多平台的，并且支持移动设备，台式机和浏览器。此软件包为**官方出品**。
+
+> pub 地址：https://pub.dev/packages/http 
+> Github 地址：https://github.com/dart-lang/http
+
+
+#####  引入软件包
+在 pubspec.yaml 中添加如下依赖：
+```
+  dependencies:
+    http: ^0.12.2
+```
+执行命令：
+```
+ flutter pub get
+```
+
+#####  使用
+发起 **get** 请求：
+
+```
+ import 'package:http/http.dart';
+ 
+ var http = Client();
+ Response response = await http.get('https://github.com/781238222/flutter-do/blob/master/README.md');
+ print('Response status: ${response.statusCode}');
+ print('Response body: ${response.body}');
+```
+
+为了方便阅读，将包作为 **http** 调用：
+```
+ import 'package:http/http.dart' as http;
+ 
+ http.Response response = await client.get('https://github.com/781238222/flutter-do/blob/master/README.md');
+ print('Response status: ${response.statusCode}');
+ print('Response body: ${response.body}');
+```
+
+发起**post**请求:
+```
+ var url = 'https://example.com/whatsit/create';
+ var response = await http.post(url, body: {'name': 'doodle', 'color': 'blue'}); 
+```
+
+下面通过 http 获取 https://github.com/781238222/flutter-do/blob/master/README.md 内容：
+```
+ import 'package:flutter/material.dart';
+ import 'package:http/http.dart' as http;
+ 
+ ///
+ /// desc:
+ ///
+ 
+ class HttpPluginDemo extends StatefulWidget {
+   @override
+   _HttpPluginDemoState createState() => _HttpPluginDemoState();
+ }
+ 
+ class _HttpPluginDemoState extends State<HttpPluginDemo> {
+   String _data;
+ 
+   getData() async {
+     var client = http.Client();
+     http.Response response = await client
+         .get('https://github.com/781238222/flutter-do/blob/master/README.md');
+     setState(() {
+       _data = response.body;
+     });
+   }
+ 
+   @override
+   void initState() {
+     super.initState();
+     getData();
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(
+         title: Text('HttpPluginDemo'),
+       ),
+       body: Center(
+         child: Text('$_data'),
+       ),
+     );
+   }
+ }
+```
