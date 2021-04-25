@@ -11035,7 +11035,7 @@ class User {
 
 1、加入 part 'user.g.dart'; 2、在需要转换的实体 dart 类 前加入 @JsonSerializable() 注解，标识需要 json序列化处理 3、fromJson()、toJson() 方法的写法是固定模式，按模板修改即可 4、user.g.dart 和 文件名 需要保持一致，否则执行以下命令无效
 
-执行完成后会在 user.dart 同级目录下生成 `user.g.dart 文件，生成代码如下：
+执行完成后会在 user.dart 同级目录下生成 user.g.dart 文件.
 
 **此方式比较繁琐，并不推荐使用**。
 
