@@ -10941,3 +10941,121 @@ cancelToken.cancel();
 ```
  HttpManager().http.post('');
 ```
+
+### 14.8 json 数据转换为Model
+
+网络请求返回的数据通常是 json 格式，因此将 json 格式转换为 model 格外重要。
+假设 json 字符串如下：
+
+``` 
+{
+  "name": "flutter",
+  "age": 2,
+  "email": "flutter@example.com"
+}
+
+```
+定义其对应Model类:**User**
+
+```
+ class User {
+   final String name;
+   final int age;
+   final String email;
+ 
+   User({this.name, this.age, this.email});
+ 
+   @override
+   String toString() {
+     return 'name:$name,age:$age,email:$email';
+   }
+ }
+```
+
+解析：
+``` 
+String jsonStr = "{\"name\":\"laomeng\",\"age\":12,\"email\":\"flutter@example.com\"}";
+    var jsonMap = json.decode(jsonStr);
+    var user =
+        User(name: jsonMap['name'], age: jsonMap['age'], email: jsonMap['email']);
+    print('$user');
+```
+
+控制台输出：
+```
+ flutter: name:laomeng,age:12,email:flutter@example.com
+```
+
+上面的案例中，json 仅有3个字断，实际业务中往往有10多个属性，通过手写的方式不仅容易出错，而且效率极低。
+
+因此就想到了类似 Gson 框架，通过 json直接生成 Model 对象，但由于 Flutter 禁止使用反射，所以类似 Gson 这样通过反射进行序列化的方式是行不通了。
+
+类似 Gson 框架需要使用运行时反射，这在Flutter中是禁用的。运行时反射会干扰Dart的tree shaking_。使用_tree shaking，我们可以在发版时“去除”未使用的代码。这可以显着优化应用程序的大小。
+
+机智如Google官方，当然也注意到了此问题，因此 Google 官方提供了一套解决方案：json_serializable。
+
+#####  json_serializable
+在pubspec.yaml添加开发依赖：
+```
+ dev_dependencies:
+   json_serializable: ^3.0.0
+   build_runner: ^1.6.1
+```
+
+注意，这个是开发依赖项，它是开发过程中的一些辅助工具，依赖添加到 **dev_dependencies** 而不是 dependencies。添加完依赖后执行“flutter packages get”，执行完毕就可以使用 json_serializable了。
+
+User 修改如下：
+
+``` 
+import 'package:json_annotation/json_annotation.dart';
+
+part 'user.g.dart';
+///
+/// desc:
+///
+@JsonSerializable()
+class User {
+  final String name;
+  final int age;
+  final String email;
+
+  User({this.name, this.age, this.email});
+
+  factory User.fromJson(Map<String, dynamic> srcJson) =>
+      _$UserFromJson(srcJson);
+
+  toJson() => _$UserToJson(this);
+
+  @override
+  String toString() {
+    return 'name:$name,age:$age,email:$email';
+  }
+}
+```
+
+1、加入 part 'user.g.dart'; 2、在需要转换的实体 dart 类 前加入 @JsonSerializable() 注解，标识需要 json序列化处理 3、fromJson()、toJson() 方法的写法是固定模式，按模板修改即可 4、user.g.dart 和 文件名 需要保持一致，否则执行以下命令无效
+
+执行完成后会在 user.dart 同级目录下生成 `user.g.dart 文件，生成代码如下：
+
+**此方式比较繁琐，并不推荐使用**。
+
+##### 在线生成
+
+打开 https://app.quicktype.io/ 网站：
+只需填写 类名 和 json 格式的字符串即可，中间生成相关代码，拷贝到项目即可。
+
+##### JsonToDart 插件【推荐】
+
+1. 在 Android Studio 中安装 **JsonToDart** 插件，打开 Preferences（Mac）或者 Setting（Window），选择 Plugins，搜索 JsonToDart
+
+2. 点击 Install（上图已经安装），安装完成后重启即可，如果搜索不到可以到官网下载本地安装
+
+3. 选定目录，点击右键，选择 New->Json to Dart，或者使用快捷键:
+ - Windows：ALT + Shift + D
+ - Mac：Option + Shift + D
+ 
+ 弹出对话框
+ 
+ 在对话框内填入 json  Generate
+ 
+
