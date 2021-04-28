@@ -11059,3 +11059,156 @@ class User {
  在对话框内填入 json  Generate
  
 
+## 15.混合开发
+
+### 15.1 嵌入原生View-Android
+
+### 15.2 嵌入原生View-IOS
+
+### 15.3 与原生通信-MethodChannel
+
+##### 平台通信的3中方式
+
+Flutter 与 Native 端通信有如下3个方法：
+
+- **MethodChannel**：Flutter 与 Native 端相互调用，调用后可以返回结果，可以 Native 端主动调用，也可以Flutter主动调用，属于双向通信。此方式为最常用的方式， Native 端调用需要在主线程中执行。
+- **BasicMessageChannel**：用于使用指定的编解码器对消息进行编码和解码，属于双向通信，可以 Native 端主动调用，也可以Flutter主动调用。
+- **EventChannel**：用于数据流（event streams）的通信， Native 端主动发送数据给 Flutter，通常用于状态的监听，比如网络变化、传感器数据等。
+
+##### 通信架构图
+
+![Android](https://github.com/hykruntoahead/FlutterGraduateSchool/blob/master/rmd_img/method_channel_1.png)
+
+Flutter 与 Native 端通信是异步的。
+
+ 
+ #####  MethodChannel (Android)
+ 
+ **flutter 端**
+ 
+ Flutter 端创建 MethodChannel 通道，用于与原生端通信：
+ ```
+   var channel = MethodChannel('com.flutter.guide.MethodChannel');
+ ```
+
+com.flutter.guide.MethodChannel 是 MethodChannel 的名称，原生端要与之对应。
+
+发送消息：
+```
+ var result = await channel.invokeMethod('sendData',{'name': 'ykheeeeee', 'age': 18})
+```
+
+- 第一个参数表示method，方法名称，原生端会解析此参数。
+- 第二个参数表示参数，类型任意，多个参数通常使用Map。
+- 返回 Future，原生端返回的数据
+
+**Android端**
+android 下创建 MethodChannelDemo：
+```kotlin
+  package com.flutter.guide
+  
+  import io.flutter.plugin.common.BinaryMessenger
+  import io.flutter.plugin.common.MethodCall
+  import io.flutter.plugin.common.MethodChannel
+  
+  /**
+   * des:
+   */
+  class MethodChannelDemo(messenger: BinaryMessenger): MethodChannel.MethodCallHandler {
+  
+      private var channel: MethodChannel
+  
+      init {
+          channel = MethodChannel(messenger, "com.flutter.guide.MethodChannel")
+          channel.setMethodCallHandler(this)
+      }
+  
+      override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+          
+      }
+  }
+
+```
+**onMethodCall** 方法在 Flutter 端调用 invokeMethod 方法回调，解析方法如下：
+```
+ override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+     if (call.method == "sendData") {
+         val name = call.argument("name") as String?
+         val age = call.argument("age") as Int?
+ 
+         var map = mapOf("name" to "hello,$name",
+                 "age" to "$age"
+         )
+         result.success(map)
+     }
+ }
+```
+
+- call.method 字符串就是 invokeMethod 方法传入的 method。
+- call.argument 是 invokeMethod 传入的参数，由于 Flutter 端传入的是 Map，所以上面的解析按照 Map 解析。
+- result.success() 是返回给 Flutter 的结果。
+
+flutter 端解析:
+``` 
+var result = await channel
+    .invokeMethod('sendData', {'name': 'laomeng', 'age': 18});
+var name = result['name'];
+var age = result['age'];
+```
+**两端的解析要相互对应。**
+
+在 **MainActivity** 启动：
+
+```
+ class MainActivity : FlutterActivity() {
+     
+     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+         super.configureFlutterEngine(flutterEngine)
+         MethodChannelDemo(flutterEngine.dartExecutor.binaryMessenger)
+     }
+ }
+```
+
+#####  原生端主动发送消息给Flutter
+
+**Flutter 端接收数据**
+
+```
+@override
+void initState() {
+  super.initState();
+  channel.setMethodCallHandler((call) {
+    setState(() {
+      _nativeData = call.arguments['count'];
+    });
+  });
+} 
+```
+
+**Android 发送数据**
+
+原生端启动定时器，每隔一秒向 Flutter 发送数据，Android 端代码：
+``` 
+
+    private var channel: MethodChannel
+    private var count = 0
+
+    init {
+        channel = MethodChannel(messenger, "com.flutter.guide.MethodChannel")
+        channel.setMethodCallHandler(this)
+        startTimer()
+    }
+
+
+    fun startTimer() {
+        var timer = Timer().schedule(timerTask {
+            activity.runOnUiThread { 
+                // 注意：Android 端发送数据要在主现场中调用
+                var map = mapOf("count" to count++)
+                channel.invokeMethod("timer", map)
+            }
+        }, 0, 1000)
+
+    }
+```
+
