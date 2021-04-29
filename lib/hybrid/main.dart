@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app_demo/hybrid/MethodChannelDemo.dart';
+import 'package:flutter_app_demo/hybrid/BasicMessageChannelDemo.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
             )),
 
         home:Scaffold(
-            body:MethodChannelDemo()
+            body:BasicMessageChannelDemo()
         )
     );
   }

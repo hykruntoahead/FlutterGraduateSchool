@@ -1,9 +1,7 @@
 package com.example.flutter_app_demo
 
 import android.app.Activity
-import android.content.Context
 import android.util.Log
-import androidx.annotation.UiThread
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

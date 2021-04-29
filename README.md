@@ -11212,3 +11212,179 @@ void initState() {
     }
 ```
 
+### 15.4 与原生通信 -  BasicMessageChannel
+
+#####  Flutter 端
+Flutter 端创建 **MethodChannel** 通道，用于与原生端通信：
+```
+ var channel = BasicMessageChannel('com.flutter.guide.BasicMessageChannel',StandardMessageCodec());
+```
+
+**com.flutter.guide.BasicMessageChannel** 是 BasicMessageChannel 的名称，原生端要与之对应。
+
+发送消息：
+```
+var result = await channel.send({'name': 'laomeng', 'age': 18}); 
+```
+- 参数类型任意，多个参数通常使用**Map**。
+- 返回 Future，原生端返回的数据。
+
+完整代码:
+```
+ class BasicMessageChannelDemo extends StatefulWidget {
+   @override
+   _BasicMessageChannelDemoState createState() 
+                    => _BasicMessageChannelDemoState();
+ }
+ 
+ class _BasicMessageChannelDemoState extends State<BasicMessageChannelDemo> {
+   var channel = BasicMessageChannel('com.flutter.guide.BasicMessageChannel',StandardMessageCodec());
+ 
+   var _data;
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(),
+       body: Column(
+         children: [
+           SizedBox(
+             height: 50,
+           ),
+           RaisedButton(
+             child: Text('发送数据到原生'),
+             onPressed: () async {
+               var result = await channel.send({'name': 'laomeng', 'age': 18});
+               var name = result['name'];
+               var age = result['age'];
+               setState(() {
+                 _data = '$name,$age';
+               });
+             },
+           ),
+           Text('原生返回数据：$_data'),
+         ],
+       ),
+     );
+   }
+ }
+```
+
+##### Android 端
+android 下创建 **BasicMessageChannelDemo**：
+```
+ class BasicMessageChannelDemo(messenger: BinaryMessenger) : BasicMessageChannel.MessageHandler<Any> {
+ 
+     private var channel: BasicMessageChannel<Any>
+ 
+     init {
+         channel = BasicMessageChannel(messenger, "com.flutter.guide.BasicMessageChannel", StandardMessageCodec())
+         channel.setMessageHandler(this)
+     }
+ 
+     override fun onMessage(message: Any?, reply: BasicMessageChannel.Reply<Any>) {
+         val name = (message as Map<String, Any>)["name"]
+         val age = (message as Map<String, Any>)["age"]
+ 
+         var map = mapOf("name" to "hello,$name",
+                 "age" to "$age"
+         )
+ 
+         reply.reply(map)
+     }
+ } 
+```
+
+onMessage 方法在 Flutter 端调用 send 方法后调用.
+
+- message 是传入的参数，由于 Flutter 端传入的是 Map，所以上面的解析按照 Map 解析
+- reply.reply() 是返回给 Flutter 的结果
+
+Flutter 端解析：
+``` 
+var result = await channel.send({'name': 'laomeng', 'age': 18});
+var name = result['name'];
+var age = result['age'];
+```
+> 两端的解析要相互对应。
+
+在 MainActivity 启动：
+```
+ class MainActivity : FlutterActivity() {
+ 
+     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+         super.configureFlutterEngine(flutterEngine)
+         BasicMessageChannelDemo(flutterEngine.dartExecutor.binaryMessenger)
+     }
+ }
+```
+
+##### 原生端主动发送消息给Flutter
+
+**Flutter 端接收数据**
+```
+ @override
+   void initState() {
+     super.initState();
+     channel.setMessageHandler((message) {
+       setState(() {
+         _nativeData = message['count'];
+       });
+     });
+   }
+```
+
+**Android 发送数据**
+原生端启动定时器，每隔一秒向 Flutter 发送数据，Android 端代码：
+```
+ class BasicMessageChannelDemo(var activity: Activity, messenger: BinaryMessenger) : BasicMessageChannel.MessageHandler<Any> {
+ 
+     private var channel: BasicMessageChannel<Any>
+     private var count = 0
+ 
+     init {
+         channel = BasicMessageChannel(messenger, "com.flutter.guide.BasicMessageChannel", StandardMessageCodec())
+         channel.setMessageHandler(this)
+         startTimer()
+     }
+ 
+ 
+     fun startTimer() {
+         var timer = Timer().schedule(timerTask {
+             activity.runOnUiThread {
+                 var map = mapOf("count" to count++)
+                 channel.send(map,object :BasicMessageChannel.Reply<Any>{
+                     override fun reply(reply: Any?) {
+ 
+                     }
+                 })
+             }
+         }, 0, 1000)
+ 
+     }
+ 
+     override fun onMessage(message: Any?, reply: BasicMessageChannel.Reply<Any>) {
+         val name = (message as Map<String, Any>)["name"]
+         val age = (message as Map<String, Any>)["age"]
+ 
+         var map = mapOf("name" to "hello,$name",
+                 "age" to "$age"
+         )
+ 
+         reply.reply(map)
+     }
+ }
+```
+
+启动修改如下：
+```
+ class MainActivity : FlutterActivity() {
+ 
+     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+         super.configureFlutterEngine(flutterEngine)
+         BasicMessageChannelDemo(this,flutterEngine.dartExecutor.binaryMessenger)
+         flutterEngine.plugins.add(MyPlugin())
+     }
+ }
+```
+

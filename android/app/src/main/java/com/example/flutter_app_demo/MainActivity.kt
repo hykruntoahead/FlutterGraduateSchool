@@ -7,6 +7,7 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannelDemo(this,flutterEngine.dartExecutor.binaryMessenger)
+//        MethodChannelDemo(this,flutterEngine.dartExecutor.binaryMessenger)
+        BasicMessageChannelDemo(this,flutterEngine.dartExecutor.binaryMessenger);
     }
 }
