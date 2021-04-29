@@ -11388,3 +11388,112 @@ var age = result['age'];
  }
 ```
 
+### 15.5 与原生通信-EventChannel
+
+##### Flutter 端
+Flutter端创建 **EventChannel**通道,用于与原生通信:
+```
+ var _eventChannel = EventChannel('com.flutter.guide.EventChannel');
+```
+**com.flutter.guide.EventChannel** 是 EventChannel 的名称，原生端要与之对应。
+
+监听原生端发送的消息：
+```
+ var _data;
+   @override
+   void initState() {
+     super.initState();
+     _eventChannel.receiveBroadcastStream().listen(_onData);
+   }
+ 
+   _onData(event){
+     setState(() {
+       _data = event;
+     });
+   }
+```
+
+Flutter 端完整代码：
+```
+ class EventChannelDemo extends StatefulWidget {
+   @override
+   _EventChannelDemoState createState() => _EventChannelDemoState();
+ }
+ 
+ class _EventChannelDemoState extends State<EventChannelDemo> {
+ 
+   var _eventChannel = EventChannel('com.flutter.guide.EventChannel');
+   var _data;
+   @override
+   void initState() {
+     super.initState();
+     _eventChannel.receiveBroadcastStream().listen(_onData);
+   }
+ 
+   _onData(event){
+     setState(() {
+       _data = event;
+     });
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       appBar: AppBar(),
+       body: Center(
+         child: Text('$_data'),
+       ),
+     );
+   }
+ }
+```
+
+##### Android 端
+android 下创建 **EventChannelDemo**：
+```
+ class EventChannelDemo(var activity: Activity, messenger: BinaryMessenger):EventChannel.StreamHandler {
+     private var channel: EventChannel
+     private var index = 0
+     private var events: EventChannel.EventSink? = null
+     init {
+         channel = EventChannel(messenger, "com.flutter.guide.EventChannel")
+         channel.setStreamHandler(this)
+         startTimer()
+     }
+ 
+ 
+     fun startTimer() {
+         var timer = Timer().schedule(timerTask {
+             index++
+             var map = mapOf("name" to "laomeng${index}",
+                     "age" to "${index}"
+             )
+             activity.runOnUiThread {
+                 events?.success(map)
+             }
+ 
+         }, 0, 1000)
+ 
+     }
+ 
+     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+         this.events = events
+     }
+ 
+     override fun onCancel(arguments: Any?) {
+         this.events = null
+     }
+ }
+```
+
+在 MainActivity 启动：
+```
+class MainActivity : FlutterActivity() {
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        EventChannelDemo(this,flutterEngine.dartExecutor.binaryMessenger) 
+    }
+}
+ 
+```
