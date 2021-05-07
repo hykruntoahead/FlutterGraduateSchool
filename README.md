@@ -11729,3 +11729,110 @@ Widget build(BuildContext context) {
 ```
 
 ### 15.8 添加flutter到iOS
+
+
+## 16.国际化
+
+###16.1 添加国际化支持
+```
+ flutter_localizations:
+    sdk: flutter 
+```
+
+### 16.2 应用内切换语言
+
+应用程序实现切换语言功能只需将 MaterialApp 中 locale 属性作为一个变量，切换不同的 Locale 即可达到切换语言的目的.
+
+### 16.3 使用Intl包实现国际化
+
+**Intl** 官方出品，包含用于处理国际化/本地化消息，日期和数字格式和解析，双向文本以及其他国际化问题。
+
+Android Studio 和 VS Code 都有 Flutter Intl 插件，方便接入。
+##### 安装插件
+ Android Studio -> File -> Setting -> Plugins -> 搜索Flutter Intl.
+ 安装重启即可。
+
+##### 添加依赖:
+```
+ dev_dependencies:
+ 	...
+   flutter_localizations:
+     sdk: flutter
+```
+flutter pub get.
+
+Tool->Flutter Intl ->Initalize for the project：
+
+成功后，在 pubspec.yaml末尾增加：
+```
+ flutter_intl:
+   enabled: true
+```
+
+在lib下生成**generated** 和 **l10n**:
+
+- generated包下的intl目录默认生成 messages_all.dart 和 messages_en.dart 文件，messages开头的文件无需手动修改，是自动生成的。
+- generated包下的 I10n.dart 是Localizations和Delegate的实现，无需手动修改，是自动生成的。
+- l10n包下存在一个intl_en.arb文件，文案存放在此处。
+
+##### 添加语言
+
+Tool->Flutter Intl -> Add Locale：
+
+##### 添加系统国际化支持
+在pubspec.yaml文件中添加包依赖：
+``` 
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+```
+MaterialApp 修改如下：
+``` 
+MaterialApp(
+  ...
+  localizationsDelegates: [
+    S.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: S.delegate.supportedLocales,
+  ...
+)
+```
+
+##### 在 intl_en.arb 和 intl_zh.arb下添加文案
+
+添加一个 **title** 文案,intl_en.arb：
+```
+ {
+   "title": "hello word"
+ }
+```
+intl_zh.arb：
+```
+ {
+   "title": "你好"
+ }
+```
+
+按 command + s 保存，generated 目录下相关文件将会重新生成。
+
+使用：
+```
+ class LocalizationDemo extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     return Scaffold(
+       body: Center(
+         child: Text('${S.of(context).title}'),
+       ),
+     );
+   }
+ }
+```
+ 
+ 
+Intl 还可以进行日期和数字格式化等， 具体功能可参考官方文档：https://github.com/dart-lang/intl
