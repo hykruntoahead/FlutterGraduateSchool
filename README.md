@@ -11577,3 +11577,153 @@ FlutterEngineCache
 ```
 
 如果使用缓存引擎在FlutterActivity（或 FlutterFragment）指定不同路由，如何处理？这时需要创建一个 **method channel**，flutter 接收具体消息从而切换不同的路由。
+
+
+### 15.7 添加Flutter到Android Fragment
+
+##### 使用新引擎创建 FlutterFragment
+
+添加到 Fragment 代码：
+```
+ class MainActivity : AppCompatActivity() {
+ 
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         setContentView(R.layout.activity_main)
+ 
+         val fragment = FlutterFragment.createDefault()
+         supportFragmentManager
+             .beginTransaction()
+             .add(R.id.fragment_container, fragment)
+             .commit()
+     }
+ }
+```
+
+通常情况下，需要将 Activity 的生命周期透传给 FlutterFragment：
+```
+ class MainActivity : AppCompatActivity() {
+   override fun onPostResume() {
+     super.onPostResume()
+     flutterFragment!!.onPostResume()
+   }
+ 
+   override fun onNewIntent(@NonNull intent: Intent) {
+     flutterFragment!!.onNewIntent(intent)
+   }
+ 
+   override fun onBackPressed() {
+     flutterFragment!!.onBackPressed()
+   }
+ 
+   override fun onRequestPermissionsResult(
+     requestCode: Int,
+     permissions: Array<String?>,
+     grantResults: IntArray
+   ) {
+     flutterFragment!!.onRequestPermissionsResult(
+       requestCode,
+       permissions,
+       grantResults
+     )
+   }
+ 
+   override fun onUserLeaveHint() {
+     flutterFragment!!.onUserLeaveHint()
+   }
+ 
+   override fun onTrimMemory(level: Int) {
+     super.onTrimMemory(level)
+     flutterFragment!!.onTrimMemory(level)
+   }
+ }
+```
+
+指定引擎路由：
+```
+ val fragment = FlutterFragment
+     .withNewEngine()
+     .initialRoute("one_page")
+     .build<FlutterFragment>()
+ 
+ supportFragmentManager
+     .beginTransaction()
+     .add(R.id.fragment_container, fragment)
+     .commit()
+```
+
+##### 使用缓存引擎创建 FlutterFragment
+``` 
+class MyApplication : Application() {
+    lateinit var flutterEngine: FlutterEngine
+
+    override fun onCreate() {
+        super.onCreate()
+        flutterEngine = FlutterEngine(this)
+        flutterEngine.dartExecutor.executeDartEntrypoint(
+            DartExecutor.DartEntrypoint.createDefault()
+        )
+        FlutterEngineCache
+            .getInstance()
+            .put("engine_id", flutterEngine)
+
+
+    }
+}
+```
+使用：
+```
+ val fragment = FlutterFragment
+     .withCachedEngine("engine_id")
+     .build<FlutterFragment>()
+ 
+ supportFragmentManager
+     .beginTransaction()
+     .add(R.id.fragment_container, fragment)
+     .commit()
+```
+
+初始化缓存引擎的路由：
+```
+ flutterEngine = FlutterEngine(this)
+ 
+ flutterEngine.navigationChannel.setInitialRoute("one_page")
+ 
+ flutterEngine.dartExecutor.executeDartEntrypoint(
+     DartExecutor.DartEntrypoint.createDefault()
+ )
+ FlutterEngineCache
+     .getInstance()
+     .put("engine_id", flutterEngine)
+```
+
+##### 更改 FlutterFragment 的渲染模式
+FlutterFragment 的渲染模式有两种：SurfaceView 和 TextureView，默认是 SurfaceView，SurfaceView 的性能比 TextureView 好，但其层次结构必须在最顶层或最底层，而且在 Android N之前的Android版本上，无法对 SurfaceView 进行动画处理，因为它们的布局和渲染与其他 View 层次结构不同步，因此要合理选择渲染模式，渲染模式设置方法如下：
+```
+ val fragment = FlutterFragment
+     .withNewEngine()
+     .renderMode(RenderMode.texture)
+     .build<FlutterFragment>()
+```
+
+##### 设置 FlutterFragment 透明
+```
+val fragment = FlutterFragment
+    .withNewEngine()
+    .transparencyMode(TransparencyMode.transparent)
+    .build<FlutterFragment>() 
+```
+
+因为 Flutter 本身没有设置透明，设置Flutter 透明：
+``` 
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(widget.title),
+    ),
+    backgroundColor: Colors.transparent,
+    ...
+  );
+}
+```
