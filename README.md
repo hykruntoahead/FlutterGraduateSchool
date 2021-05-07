@@ -11835,4 +11835,4 @@ intl_zh.arb：
 ```
  
  
-Intl 还可以进行日期和数字格式化等， 具体功能可参考官方文档：https://github.com/dart-lang/intl
+**Intl** 还可以进行**日期和数字格式化**等， 具体功能可参考官方文档：https://github.com/dart-lang/intl
