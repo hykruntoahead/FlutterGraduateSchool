@@ -11576,4 +11576,4 @@ FlutterEngineCache
 
 ```
 
-如果使用缓存引擎在FlutterActivity（或 FlutterFragment）指定不同路由，如何处理？这时需要创建一个 method channel，flutter 接收具体消息从而切换不同的路由。
+如果使用缓存引擎在FlutterActivity（或 FlutterFragment）指定不同路由，如何处理？这时需要创建一个 **method channel**，flutter 接收具体消息从而切换不同的路由。
