@@ -11497,3 +11497,83 @@ class MainActivity : FlutterActivity() {
 }
  
 ```
+
+### 15.6 添加Flutter到Android Activity
+
+Flutter可以以源代码或AAR的方法嵌入到Android原生项目.
+
+
+##### 启动页加载 Flutter
+
+- 将 Flutter 页面加载到 MainActivity（默认启动页） 中，只需让 MainActivity 继承 FlutterActivity 即可。
+
+> 注意：FlutterActivity的包名是io.flutter.embedding.android.FlutterActivity
+
+##### 跳转到 Flutter 页面
+
+```
+startActivity(Intent(this, FlutterActivity::class.java)) 
+```
+or
+```
+startActivity(FlutterActivity.createDefaultIntent(this)) 
+```
+
+如果有多个Flutter页面，如何指定跳转:
+```
+ startActivity(
+                 FlutterActivity
+                     .withNewEngine()
+                     .initialRoute("one_page")
+                     .build(this)
+```
+
+##### 引擎缓存
+
+加载 FlutterActivity 页面时明显看到一段时间的黑屏，这段时间主要是启动 Flutter 引擎.
+
+
+为了减少 FlutterActivity 页面的延迟时间和多个 FlutterActivity 实例内存一直增长问题，我们可以使用 Flutter 引擎（FlutterEngine）缓存，在启动 FlutterActivity 前先启动 Flutter 引擎，然后使用缓存的引擎加载页面，通常将其放在 Application 中：
+
+``` 
+class MyApplication : Application() {
+    lateinit var flutterEngine: FlutterEngine
+
+    override fun onCreate() {
+        super.onCreate()
+        flutterEngine = FlutterEngine(this)
+        flutterEngine.dartExecutor.executeDartEntrypoint(
+            DartExecutor.DartEntrypoint.createDefault()
+        )
+        FlutterEngineCache
+            .getInstance()
+            .put("engine_id", flutterEngine)
+    }
+}
+```
+
+使用缓存的引擎：
+```
+startActivity(
+    FlutterActivity
+        .withCachedEngine("engine_id")
+        .build(this)
+) 
+```
+
+可以在启动缓存引擎时指定其初始路由：
+``` 
+flutterEngine = FlutterEngine(this)
+
+flutterEngine.navigationChannel.setInitialRoute("one_page")
+
+flutterEngine.dartExecutor.executeDartEntrypoint(
+    DartExecutor.DartEntrypoint.createDefault()
+)
+FlutterEngineCache
+    .getInstance()
+    .put("engine_id", flutterEngine)
+
+```
+
+如果使用缓存引擎在FlutterActivity（或 FlutterFragment）指定不同路由，如何处理？这时需要创建一个 method channel，flutter 接收具体消息从而切换不同的路由。
